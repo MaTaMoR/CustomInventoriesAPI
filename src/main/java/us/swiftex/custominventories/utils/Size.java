@@ -1,6 +1,7 @@
 package us.swiftex.custominventories.utils;
 
 public enum Size {
+
     ONE_LINE(9),
     TWO_LINE(18),
     THREE_LINE(27),
@@ -16,6 +17,44 @@ public enum Size {
 
     public int getSize() {
         return size;
+    }
+
+    public int getLine() {
+        switch (this) {
+            case ONE_LINE:
+                return 0;
+            case TWO_LINE:
+                return 1;
+            case THREE_LINE:
+                return 2;
+            case FOUR_LINE:
+                return 3;
+            case FIVE_LINE:
+                return 4;
+            case SIX_LINE:
+                return 5;
+            default:
+                return 0;
+        }
+    }
+
+    public int getPosition() {
+        switch (this) {
+            case ONE_LINE:
+                return 1;
+            case TWO_LINE:
+                return 2;
+            case THREE_LINE:
+                return 3;
+            case FOUR_LINE:
+                return 4;
+            case FIVE_LINE:
+                return 5;
+            case SIX_LINE:
+                return 6;
+            default:
+                return 0;
+        }
     }
 
     public static Size fit(int slots) {

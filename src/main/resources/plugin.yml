@@ -1,4 +1,4 @@
 name: CustomInventoriesAPI
-main: us.swiftex.custominventories.CustomInventoriesMain
-version: 1.7
+main: us.swiftex.custominventories.CustomInventories
+version: 1.14
 author: MaTaMoR_

@@ -23,12 +23,44 @@ public class CastUtils {
             return (Double) object;
         } else if(object instanceof String) {
             try {
-                return Integer.parseInt((String) object);
+                return Double.parseDouble((String) object);
             } catch (NumberFormatException ignored) {
 
             }
         } else if(object instanceof Number) {
             return ((Number) object).doubleValue();
+        }
+
+        throw new FormatException(object + " is not valid format");
+    }
+
+    public static long asLong(Object object) {
+        if(object instanceof Long) {
+            return (Long) object;
+        } else if(object instanceof String) {
+            try {
+                return Long.parseLong((String) object);
+            } catch (NumberFormatException ignored) {
+
+            }
+        } else if(object instanceof Number) {
+            return ((Number) object).longValue();
+        }
+
+        throw new FormatException(object + " is not valid format");
+    }
+
+    public static float asFloat(Object object) {
+        if(object instanceof Float) {
+            return (Float) object;
+        } else if(object instanceof String) {
+            try {
+                return Float.parseFloat((String) object);
+            } catch (NumberFormatException ignored) {
+
+            }
+        } else if(object instanceof Number) {
+            return ((Number) object).floatValue();
         }
 
         throw new FormatException(object + " is not valid format");
@@ -68,7 +100,7 @@ public class CastUtils {
         return (T) object;
     }
 
-    private static class FormatException extends RuntimeException {
+    public static class FormatException extends RuntimeException {
 
         public FormatException(String message) {
             super(message);

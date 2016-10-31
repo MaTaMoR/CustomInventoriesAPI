@@ -16,6 +16,10 @@ public class CustomHolder implements InventoryHolder {
         return customInventory;
     }
 
+    public void setCustomInventory(CustomInventory customInventory) {
+        this.customInventory = customInventory;
+    }
+
     @Override
     public Inventory getInventory() {
         return Bukkit.createInventory(null, 9);

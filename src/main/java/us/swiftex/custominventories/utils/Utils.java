@@ -9,10 +9,6 @@ import java.util.List;
 public class Utils {
 
     public static String colorize(String text) {
-        if(text == null) {
-            return null;
-        }
-
         return ChatColor.translateAlternateColorCodes('&', text);
     }
 
@@ -34,5 +30,14 @@ public class Utils {
 
     public static String format(double value) {
         return format.format(value);
+    }
+
+    public static boolean isClassLoaded(String path) {
+        try {
+            Class.forName(path);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 }

@@ -1,8 +1,9 @@
 package us.swiftex.custominventories.actions.defaults;
 
 import org.bukkit.entity.Player;
+import us.swiftex.custominventories.CustomInventories;
 import us.swiftex.custominventories.actions.ClickAction;
-import us.swiftex.custominventories.utils.BungeeCordUtils;
+import us.swiftex.custominventories.utils.BungeeCord;
 import us.swiftex.custominventories.utils.Validate;
 
 public class MoveServer extends ClickAction {
@@ -21,6 +22,6 @@ public class MoveServer extends ClickAction {
 
     @Override
     public void execute(Player player) {
-        BungeeCordUtils.moveServer(player, server);
+        CustomInventories.getBungeeCord().moveServer(player, server);
     }
 }

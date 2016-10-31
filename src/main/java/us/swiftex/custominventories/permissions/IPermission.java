@@ -11,24 +11,17 @@ public class IPermission {
 
     private final Set<IPermission> children = new HashSet<>();
 
-    private final Plugin plugin;
     private final String permission;
 
     private IPermission parent;
 
-    public IPermission(Plugin plugin, String permission) {
-        this(plugin, permission, null);
+    public IPermission(String permission) {
+        this(permission, null);
     }
 
-    public IPermission(Plugin plugin, String permission, IPermission parent) {
-        super();
-        this.plugin = plugin;
+    public IPermission(String permission, IPermission parent) {
         this.permission = permission;
         this.parent = parent;
-    }
-
-    public Plugin getPlugin() {
-        return plugin;
     }
 
     public String getPermission() {
@@ -44,6 +37,10 @@ public class IPermission {
         if(this.parent != null) {
             this.parent.children.add(this);
         }
+    }
+
+    public IPermission getParent() {
+        return parent;
     }
 
     public Set<IPermission> getChilden() {
