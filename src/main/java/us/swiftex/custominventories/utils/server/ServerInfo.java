@@ -53,7 +53,7 @@ public class ServerInfo {
     }
 
     public synchronized boolean should() {
-        return (millisInterval + lastUpdate) <= System.currentTimeMillis();
+        return System.currentTimeMillis() >= (millisInterval + lastUpdate);
     }
 
     public synchronized long getLastUpdate() {

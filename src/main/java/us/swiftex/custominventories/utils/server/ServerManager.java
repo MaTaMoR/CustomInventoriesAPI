@@ -24,6 +24,7 @@ public class ServerManager {
             @Override
             public void run() {
                 Iterator<ServerInfo> iterator = servers.values().iterator();
+                long now = System.currentTimeMillis();
 
                 while (iterator.hasNext()) {
                     ServerInfo info = iterator.next();
@@ -33,6 +34,8 @@ public class ServerManager {
                         plugin.getLogger().log(Level.SEVERE, "Removed server " + info.getName() + " from tracking due to inactivity ");
                     } else if (info.should()) {
                         boolean displayOffline = false;
+
+                        info.setLastUpdate(now);
 
                         try {
                             PingResponse data = ServerPinger.fetchData(info.getAddress(), 1000);
@@ -55,8 +58,6 @@ public class ServerManager {
                             plugin.getLogger().log(Level.SEVERE, "Couldn't fetch data from " + info.getName() + "(" + info.getAddress() + "), unhandled exception: ", e);
                         }
 
-                        info.setLastUpdate(System.currentTimeMillis());
-
                         if (displayOffline) {
                             info.setOnline(false);
                             info.setOnlinePlayers(0);
@@ -70,11 +71,8 @@ public class ServerManager {
     }
 
     public synchronized void register(ServerInfo info) {
-        if(servers.containsKey(info.getName())) {
-            throw new RuntimeException("The server " + info.getName() + " is already registered");
-        }
+        if(servers.containsKey(info.getName())) throw new RuntimeException("The server " + info.getName() + " is already registered");
 
-        info = new ServerInfo(new ServerAddress("82.223.67.170", info.getAddress().getPort()), info.getName(), info.getInterval());
         servers.put(info.getName(), info);
     }
 
