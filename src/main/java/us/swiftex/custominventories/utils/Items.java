@@ -849,7 +849,7 @@ public class Items {
 
             // Iterate through Items
             for (ItemInfo item : items) {
-                // Test for match
+                // Test for matchClick
                 if (item.getId() == typeId && item.getSubTypeId() == subTypeId) {
                     itemList[0] = item;
                     break;
@@ -863,7 +863,7 @@ public class Items {
             // Iterate through Items
             int i = 0;
             for (ItemInfo item : items) {
-                // Test for match
+                // Test for matchClick
                 if (item.getId() == typeId) {
                     itemList[i] = item;
                     i++;
@@ -875,7 +875,7 @@ public class Items {
             // Iterate through Items
             int i = 0;
             for (ItemInfo item : items) {
-                // Look through each possible match criteria
+                // Look through each possible matchClick criteria
                 for (String[] attributes : item.search) {
                     boolean match = false;
                     // Loop through entire criteria strings
@@ -885,7 +885,7 @@ public class Items {
                             break;
                         }
                     }
-                    // THIS was a match
+                    // THIS was a matchClick
                     if (match) {
                         itemList[i] = item;
                         i++;
@@ -912,7 +912,7 @@ public class Items {
 
             // Iterate through Items
             for (ItemInfo item : items) {
-                // Test for match
+                // Test for matchClick
                 if (item.getId() == typeId && item.getSubTypeId() == subTypeId) {
                     matchedItem = item;
                     break;
@@ -927,7 +927,7 @@ public class Items {
 
             // Iterate through Items
             for (ItemInfo item : items) {
-                // Test for match
+                // Test for matchClick
                 if (item.getId() == typeId && item.getSubTypeId() == subTypeId) {
                     matchedItem = item;
                     break;
@@ -945,7 +945,7 @@ public class Items {
                 int typeId = namedItem.getId();
                 // Iterate through items
                 for (ItemInfo item : items) {
-                    // Test for match
+                    // Test for matchClick
                     if (item.getId() == typeId && item.getSubTypeId() == subTypeId) {
                         matchedItem = item;
                         break;
@@ -957,7 +957,7 @@ public class Items {
 
             // Iterate through Items
             for (ItemInfo item : items) {
-                // Look through each possible match criteria
+                // Look through each possible matchClick criteria
                 for (String[] attributes : item.search) {
                     int val = 0;
                     boolean match = false;
@@ -972,7 +972,7 @@ public class Items {
                         }
                     }
 
-                    // THIS was a match
+                    // THIS was a matchClick
                     if (match) {
                         if (matchedItem == null || val > matchedValue || attributes.length > matchedItemStrength) {
                             matchedItem = item;
