@@ -43,9 +43,10 @@ public class Events implements Listener {
 
                     Player player = (Player) event.getWhoClicked();
 
-                    if(icon.getType().isValid(event)) { //Check if the click type of the Icon is valid
+                    ClickType clickType = ClickType.matchClick(event); //Get the event click type
+
+                    if(icon.getType().isValid(clickType)) { //Check if the click type of the Icon is valid
                         if(!icon.havePermission() || icon.getPermission().hasPermission(player)) { //Check if player has permissions to use this Icon
-                            ClickType clickType = ClickType.matchClick(event);
 
                             for (ActionHandler actionHandler : icon.getClickActions()) { //Loop thought the ActionHandler and call em
                                 actionHandler.handle(inventory, player, clickType, event.isShiftClick(), event);
@@ -79,7 +80,7 @@ public class Events implements Listener {
 
         final InventoryView view = event.getView();
 
-        //So im using a custom holder to hold the custom inventory, so the first thing is check if the holder is our custom one
+        //Check if the holder is our custom one
         if(view.getTopInventory().getHolder() instanceof CustomHolder) {
             final Set<Integer> slots = new HashSet<>();
             for(int rawSlot : event.getRawSlots()) { //Remove all the slots from the top inventory
