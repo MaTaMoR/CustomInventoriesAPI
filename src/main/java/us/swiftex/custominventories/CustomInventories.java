@@ -1,6 +1,6 @@
 package us.swiftex.custominventories;
 
-import org.bukkit.Bukkit;
+import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -10,8 +10,13 @@ import us.swiftex.custominventories.utils.server.ServerManager;
 
 public class CustomInventories extends JavaPlugin {
 
+    @Getter
     private static Plugin plugin;
+
+    @Getter
     private static BungeeCord bungeeCord;
+
+    @Getter
     private static ServerManager serverManager;
 
     @Override
@@ -21,8 +26,10 @@ public class CustomInventories extends JavaPlugin {
 
         plugin = this;
 
-        Bukkit.getServer().getPluginManager().registerEvents(new Events(), this);
-        Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+        saveDefaultConfig();
+
+        getServer().getPluginManager().registerEvents(new Events(), this);
+        getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 
         bungeeCord = new BungeeCord(this);
         serverManager = new ServerManager(this);
@@ -33,21 +40,9 @@ public class CustomInventories extends JavaPlugin {
         serverManager.stop();
         serverManager.clear();
 
-        for (Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : getServer().getOnlinePlayers()) {
             player.closeInventory();
         }
-    }
-
-    public static Plugin getPlugin() {
-        return plugin;
-    }
-
-    public static BungeeCord getBungeeCord() {
-        return bungeeCord;
-    }
-
-    public static ServerManager getServerManager() {
-        return serverManager;
     }
 }
 

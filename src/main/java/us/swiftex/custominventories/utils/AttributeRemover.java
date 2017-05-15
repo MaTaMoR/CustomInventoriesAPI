@@ -63,10 +63,12 @@ public class AttributeRemover {
 
         if (useItemFlags) {
             ItemMeta meta = item.getItemMeta();
+
             if (isNullOrEmpty(meta.getItemFlags())) {
                 meta.addItemFlags(ItemFlag.values());
                 item.setItemMeta(meta);
             }
+
             return item;
 
         } else if (useReflection) {

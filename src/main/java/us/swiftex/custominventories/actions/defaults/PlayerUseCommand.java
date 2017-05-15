@@ -22,6 +22,6 @@ public class PlayerUseCommand extends ClickAction {
 
     @Override
     public void execute(Player player) {
-        player.performCommand(Variable.replace(Utils.colorize(command), player));
+        player.performCommand(Variable.replace(Utils.color(command), player));
     }
 }

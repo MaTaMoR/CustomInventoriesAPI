@@ -11,7 +11,7 @@ public enum Size {
 
     private final int size;
 
-    private Size(int size) {
+    Size(int size) {
         this.size = size;
     }
 

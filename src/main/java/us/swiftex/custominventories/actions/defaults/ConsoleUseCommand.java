@@ -23,6 +23,6 @@ public class ConsoleUseCommand extends ClickAction {
 
     @Override
     public void execute(Player player) {
-        Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), Variable.replace(Utils.colorize(command), player));
+        Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), Variable.replace(Utils.color(command), player));
     }
 }

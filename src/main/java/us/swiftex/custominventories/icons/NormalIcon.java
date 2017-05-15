@@ -1,5 +1,6 @@
 package us.swiftex.custominventories.icons;
 
+import lombok.Getter;
 import org.bukkit.entity.Player;
 import us.swiftex.custominventories.enums.ClickType;
 import us.swiftex.custominventories.permissions.IPermission;
@@ -7,6 +8,7 @@ import us.swiftex.custominventories.utils.CustomItem;
 
 public class NormalIcon extends Icon {
 
+    @Getter
     private final CustomItem item;
 
     public NormalIcon(CustomItem item) {
@@ -26,12 +28,9 @@ public class NormalIcon extends Icon {
 
         this.item = item;
     }
-    public CustomItem getItem() {
-        return item;
-    }
 
     @Override
     public CustomItem getItem(Player player) {
-        return item;
+        return this.item;
     }
 }

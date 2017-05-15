@@ -31,7 +31,7 @@ public class StringSerializer {
         return null;
     }
 
-    public static List<String> getLore(String text) {
+    public static List<String> getLore(String text) throws SerializerException {
         List<String> lore = new ArrayList<>();
 
         Matcher matcher = LORE_PATTER.matcher(text);
@@ -80,7 +80,7 @@ public class StringSerializer {
         throw new SerializerException("Invalid format Material");
     }
 
-    public static Map<Enchantment, Integer> getEnchantments(String text) {
+    public static Map<Enchantment, Integer> getEnchantments(String text) throws SerializerException {
         Map<Enchantment, Integer> enchantments = new HashMap<>();
 
         Matcher matcher = ENCHANTMENTS_PATTERN.matcher(text);
@@ -96,7 +96,7 @@ public class StringSerializer {
         return enchantments;
     }
 
-    public static List<PotionEffect> getEffects(String text) {
+    public static List<PotionEffect> getEffects(String text) throws SerializerException {
         List<PotionEffect> effects = new ArrayList<>();
 
         Matcher matcher = EFFECTS_PATTERN.matcher(text);
@@ -113,11 +113,9 @@ public class StringSerializer {
         return effects;
     }
 
-    public static CustomItem getItem(String text) {
+    public static CustomItem getItem(String text) throws SerializerException {
         MaterialEntry material = getMaterial(text);
-        if(material == null) {
-            return null;
-        }
+        if(material == null) return null;
 
         String name = getName(text);
         List<String> lore = getLore(text);
@@ -130,7 +128,7 @@ public class StringSerializer {
 
     public static String toString(CustomItem customItem) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("material:").append(customItem.getMaterial().name()).append(":").append(customItem.getAmount()).append(":").append(customItem.getDataValue());
+        stringBuilder.append("material:").append(customItem.getMaterial().name()).append(":").append(AmountUtil.serialize(customItem.getActualAmount())).append(":").append(customItem.getDataValue());
 
         if(customItem.getName() != null) {
             stringBuilder.append(" ").append("name:").append('"').append(customItem.getName()).append('"');
@@ -196,5 +194,6 @@ public class StringSerializer {
         public SerializerException(String message) {
             super(message);
         }
+
     }
 }

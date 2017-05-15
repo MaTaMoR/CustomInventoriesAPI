@@ -40,19 +40,17 @@ public class Events implements Listener {
 
                     Icon icon = inventory.getIcon(event.getRawSlot()); //Check if the clicked slot has a Icon
                     if (icon == null) return;
-
+         
                     Player player = (Player) event.getWhoClicked();
-
                     ClickType clickType = ClickType.matchClick(event); //Get the event click type
 
                     if(icon.getType().isValid(clickType)) { //Check if the click type of the Icon is valid
                         if(!icon.havePermission() || icon.getPermission().hasPermission(player)) { //Check if player has permissions to use this Icon
-
                             for (ActionHandler actionHandler : icon.getClickActions()) { //Loop thought the ActionHandler and call em
                                 actionHandler.handle(inventory, player, clickType, event.isShiftClick(), event);
                             }
                         } else {
-                            player.sendMessage(Utils.colorize(icon.getNoPermissionMessage())); //No permissions to use it
+                            player.sendMessage(Utils.color(icon.getNoPermissionMessage())); //No permissions to use it
                         }
                     }
                 } else {

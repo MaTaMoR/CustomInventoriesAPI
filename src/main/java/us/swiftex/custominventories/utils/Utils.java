@@ -1,18 +1,20 @@
 package us.swiftex.custominventories.utils;
 
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.ConfigurationSection;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Utils {
 
-    public static String colorize(String text) {
+    public static String color(String text) {
         return ChatColor.translateAlternateColorCodes('&', text);
     }
 
-    public static List<String> colorize(List<String> list) {
+    public static List<String> color(List<String> list) {
         List<String> coloredList = new ArrayList<>();
 
         if(list == null) {
@@ -20,7 +22,7 @@ public class Utils {
         }
 
         for(String row : list) {
-            coloredList.add(colorize(row));
+            coloredList.add(color(row));
         }
 
         return coloredList;
@@ -39,5 +41,15 @@ public class Utils {
         } catch (ClassNotFoundException e) {
             return false;
         }
+    }
+
+    public static Map<String, Object> asMap(Object object) {
+        if(object instanceof ConfigurationSection) {
+            return ((ConfigurationSection) object).getValues(false);
+        } else if(object instanceof Map) {
+            return ((Map<String, Object>) object);
+        }
+
+        return null;
     }
 }

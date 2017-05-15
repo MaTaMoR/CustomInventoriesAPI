@@ -1,26 +1,32 @@
 package us.swiftex.custominventories.inventories;
 
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import us.swiftex.custominventories.utils.*;
 import us.swiftex.custominventories.icons.Icon;
+import us.swiftex.custominventories.utils.server.ServerVariable;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 public class CustomInventory {
 
-    private final Map<Integer, Icon> icons = new HashMap<>();
+    private final Map<Integer, Icon> icons = new LinkedHashMap<>();
 
+    @Getter
     private String title;
+
+    @Getter
     private Size size;
 
     public CustomInventory(Size size, String title) {
         Validate.notNull(title, "Title can't be null");
+        Validate.notNull(size, "Size can't be null");
 
         this.title = title;
         this.size = size;
@@ -35,12 +41,8 @@ public class CustomInventory {
         }
     }
 
-    public Map<Integer, Icon>  getIcons() {
-        return Collections.unmodifiableMap(icons);
-    }
-
-    public String getTitle() {
-        return title;
+    public Map<Integer, Icon> getIcons() {
+        return Collections.unmodifiableMap(this.icons);
     }
 
     public void setTitle(String title) {
@@ -50,28 +52,34 @@ public class CustomInventory {
     }
 
     public void setIcon(int position, Icon icon) {
-        icons.put(position, icon);
+        Validate.notNull(icon, "Icon can't be null");
+
+        this.icons.put(position, icon);
     }
 
     public Icon getIcon(int position) {
-        return icons.get(position);
+        return this.icons.get(position);
     }
 
     public void removeIcon(int position) {
-        icons.remove(position);
+        this.icons.remove(position);
     }
 
+    //Use 'CustomInventory#getSize' instead.
+
+    @Deprecated
     public Size size() {
-        return size;
+        return this.size;
     }
 
     public Inventory createInventory(Player player) {
-        Inventory inventory = Bukkit.createInventory(new CustomHolder(this), size.getSize(), Utils.colorize(Variable.replace(title, player)));
+        Inventory inventory = Bukkit.createInventory(new CustomHolder(this), this.size.getSize(),
+                Utils.color(Variable.replace(ServerVariable.replace(this.title), player)));
 
-        for(Entry<Integer, Icon> entry : icons.entrySet()) {
-            if(entry.getKey() > size.getSize()) break;
+        for(Entry<Integer, Icon> entry : this.icons.entrySet()) {
+            if (entry.getKey() < 0 || entry.getKey() >= this.size.getSize()) continue;
 
-            if(entry.getValue().canSee(player)) {
+            if (entry.getValue().canSee(player)) {
                 inventory.setItem(entry.getKey(), entry.getValue().getItem(player).build(player));
             }
         }

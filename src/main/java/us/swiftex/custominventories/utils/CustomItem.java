@@ -50,11 +50,18 @@ public class CustomItem implements Cloneable {
     private DyeColor bannerBaseColor;
     private List<Pattern> bannerPatterns;
 
+
     public CustomItem(Material material) {
-        this(material, 1);
+        this(material, new SimpleAmount(1), (short) 0);
     }
 
+    @Deprecated
     public CustomItem(Material material, int amount) {
+        this(material, new SimpleAmount(1), (short) 0);
+    }
+
+    @Deprecated
+    public CustomItem(Material material, Amount amount) {
         this(material, amount, (short) 0);
     }
 
@@ -129,14 +136,6 @@ public class CustomItem implements Cloneable {
     public Collection<LocalVariable> getLocalVariables() {
         if(localVariables == null) return new ArrayList<>();
         return localVariables.values();
-    }
-
-    @Deprecated
-    private List<LocalVariable> getAllVariables() {
-        List<LocalVariable> localVariables = new ArrayList<>(getLocalVariables());
-        localVariables.addAll(Arrays.asList(Variable.values()));
-
-        return localVariables;
     }
 
     public boolean hasLocalVariables() {
@@ -266,9 +265,7 @@ public class CustomItem implements Cloneable {
         Validate.notNull(value, "The value can't be null");
 
         NBTType type = NBTType.byObject(value);
-        if(type == null) {
-            throw new RuntimeException("Invalid object");
-        }
+        if(type == null) throw new RuntimeException("Invalid object");
 
         setNBTData(key, type.newInstance(value));
     }
@@ -408,9 +405,11 @@ public class CustomItem implements Cloneable {
 
             name = ServerVariable.replace(name);
             if (player != null) {
-                for(LocalVariable variable : getAllVariables()) {
+                for(LocalVariable variable : getLocalVariables()) {
                     name = name.replace(variable.getText(), variable.getReplacement(player));
                 }
+
+                name = Variable.replace(name, player);
             }
 
             if(hasCalculateEvents()) {
@@ -440,9 +439,11 @@ public class CustomItem implements Cloneable {
 
             if (player != null) {
                 for (String line : lore) {
-                    for (LocalVariable lineVariable : getAllVariables()) {
+                    for (LocalVariable lineVariable : getLocalVariables()) {
                         line = line.replace(lineVariable.getText(), lineVariable.getReplacement(player));
                     }
+
+                    line = Variable.replace(line, player);
 
                     if(hasCalculateEvents()) {
                         for(CalculateEvent event : calculateEvents) {
@@ -472,6 +473,10 @@ public class CustomItem implements Cloneable {
         return output;
     }
 
+    public Map<String, Object> serialize() {
+        return serialize(this);
+    }
+
     public Builder builder() {
         return new Builder(this);
     }
@@ -485,9 +490,9 @@ public class CustomItem implements Cloneable {
 
         ItemMeta itemMeta = itemStack.getItemMeta();
 
-        if(hasName()) itemMeta.setDisplayName(Utils.colorize(calculateName(player)));
+        if(hasName()) itemMeta.setDisplayName(Utils.color(calculateName(player)));
 
-        if(hasLore()) itemMeta.setLore(Utils.colorize(calculateLore(player)));
+        if(hasLore()) itemMeta.setLore(Utils.color(calculateLore(player)));
 
         if(hasColor() && itemMeta instanceof LeatherArmorMeta) ((LeatherArmorMeta) itemMeta).setColor(color);
 
@@ -564,147 +569,155 @@ public class CustomItem implements Cloneable {
         }
 
         public Builder setMaterial(Material material) {
-            customItem.setMaterial(material);
+            this.customItem.setMaterial(material);
             return this;
         }
 
         @Deprecated
         public Builder setAmount(int amount) {
-            customItem.setAmount(amount);
+            this.customItem.setAmount(amount);
             return this;
         }
 
         public Builder setAmount(Amount amount) {
-            customItem.setAmount(amount);
+            this.customItem.setAmount(amount);
             return this;
         }
 
         public Builder setDataValue(short dataValue) {
-            customItem.setDataValue(dataValue);
+            this.customItem.setDataValue(dataValue);
             return this;
         }
 
         public Builder setName(String name) {
-            customItem.setName(name);
+            this.customItem.setName(name);
             return this;
         }
 
         public Builder setLore(String... lore) {
-            customItem.setLore(lore);
+            this.customItem.setLore(lore);
             return this;
         }
 
         public Builder setLore(List<String> lore) {
-            customItem.setLore(lore);
+            this.customItem.setLore(lore);
             return this;
         }
 
         public Builder setEnchantments(Map<Enchantment, Integer> enchantments) {
-            customItem.setEnchantments(enchantments);
+            this.customItem.setEnchantments(enchantments);
             return this;
         }
 
         public Builder addEnchantment(Enchantment enchantment) {
-            customItem.addEnchantment(enchantment);
+            this.customItem.addEnchantment(enchantment);
             return this;
         }
 
         public Builder addEnchantment(Enchantment enchantment, int level) {
-            customItem.addEnchantment(enchantment, level);
+            this.customItem.addEnchantment(enchantment, level);
             return this;
         }
 
         public Builder setColor(Color color) {
-            customItem.setColor(color);
+            this.customItem.setColor(color);
             return this;
         }
 
         @Deprecated
         public Builder setSkullOwner(String skullOwner) {
-            customItem.setSkullOwner(skullOwner);
+            this.customItem.setSkullOwner(skullOwner);
             return this;
         }
 
         public Builder setSkullData(SkullData skullData) {
-            customItem.setSkullData(skullData);
+            this.customItem.setSkullData(skullData);
             return this;
         }
 
         public Builder setItemGlow(boolean itemGlow) {
-            customItem.setItemGlow(itemGlow);
+            this.customItem.setItemGlow(itemGlow);
             return this;
         }
 
         public Builder setRemoveAttributes(boolean removeAttributes) {
-            customItem.setRemoveAttributes(removeAttributes);
+            this.customItem.setRemoveAttributes(removeAttributes);
             return this;
         }
 
         @Deprecated
         public Builder setNbtData(String key, Object nbtData) {
-            customItem.setNBTData(key, nbtData);
+            this.customItem.setNBTData(key, nbtData);
             return this;
         }
 
         public Builder setNbtData(String key, NBTTag nbtData) {
-            customItem.setNBTData(key, nbtData);
+            this.customItem.setNBTData(key, nbtData);
             return this;
         }
 
         public Builder setNbtContent(Map<String, NBTTag> content) {
-            customItem.setNBTContent(content);
+            this.customItem.setNBTContent(content);
             return this;
         }
 
         public Builder setSplash(boolean splash) {
-            customItem.setSplash(splash);
+            this.customItem.setSplash(splash);
             return this;
         }
 
         public Builder setPotionEffects(PotionEffect... effects) {
-            customItem.setPotionEffects(effects);
+            this.customItem.setPotionEffects(effects);
             return this;
         }
 
         public Builder setPotionEffects(List<PotionEffect> effects) {
-            customItem.setPotionEffects(effects);
+            this.customItem.setPotionEffects(effects);
             return this;
         }
 
         @Deprecated
         public Builder addPotionEffects(PotionEffect effect) {
-            customItem.addPotionEffect(effect);
+            this.customItem.addPotionEffect(effect);
             return this;
         }
 
         @Deprecated
         public Builder addPotionEffect(PotionEffect effect) {
-            customItem.addPotionEffect(effect);
+            this.customItem.addPotionEffect(effect);
             return this;
         }
 
         public Builder registerLocalVariable(LocalVariable variable) {
-            customItem.registerLocalVariable(variable);
+            this.customItem.registerLocalVariable(variable);
             return this;
         }
 
         public Builder setBannerBaseColor(DyeColor bannerBaseColor) {
-            customItem.setBannerBaseColor(bannerBaseColor);
+            this.customItem.setBannerBaseColor(bannerBaseColor);
             return this;
         }
 
         public Builder addBannerPattern(Pattern pattern) {
-            customItem.addBannerPattern(pattern);
+            this.customItem.addBannerPattern(pattern);
             return this;
         }
 
         public Builder setBannerPatterns(List<Pattern> pattern) {
-            customItem.setBannerPatterns(pattern);
+            this.customItem.setBannerPatterns(pattern);
             return this;
         }
 
         public CustomItem build() {
-            return customItem;
+            return this.customItem;
+        }
+
+        public ItemStack toItemStack() {
+            return this.customItem.build();
+        }
+
+        public ItemStack toItemStack(Player player) {
+            return this.customItem.build(player);
         }
     }
 
@@ -884,7 +897,10 @@ public class CustomItem implements Cloneable {
         Amount amount = new SimpleAmount(1);
         if(section.containsKey(Node.AMOUNT)) amount = AmountUtil.deserialize(CastUtils.asString(section.get(Node.AMOUNT)));
 
-        String name = CastUtils.asString(section.get(Node.NAME));
+        String name = null;
+        if (section.containsKey(Node.NAME)) {
+            name = CastUtils.asString(section.get(Node.NAME));
+        }
 
         List<String> lore = null;
 

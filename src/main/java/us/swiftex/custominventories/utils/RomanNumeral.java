@@ -13,12 +13,12 @@ public class RomanNumeral {
             throw new NumberFormatException("Value of RomanNumeral must be positive.");
         if (arabic > 3999)
             throw new NumberFormatException("Value of RomanNumeral must be 3999 or less.");
+
         num = arabic;
     }
 
 
     public RomanNumeral(String roman) {
-
         if (roman.length() == 0)
             throw new NumberFormatException("An empty string does not define a Roman numeral.");
 

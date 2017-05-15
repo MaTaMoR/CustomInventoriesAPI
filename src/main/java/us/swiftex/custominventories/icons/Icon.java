@@ -1,5 +1,7 @@
 package us.swiftex.custominventories.icons;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.entity.Player;
 import us.swiftex.custominventories.actions.ActionHandler;
 import us.swiftex.custominventories.enums.ClickType;
@@ -12,74 +14,51 @@ public abstract class Icon {
 
     public abstract CustomItem getItem(Player player);
 
-    private final Set<ActionHandler> actions = new HashSet<>();
+    private final List<ActionHandler> actions = new ArrayList<>();
 
-    private final ClickType clickType;
+    @Getter
+    private final ClickType type;
+
+    @Getter @Setter
     private IPermission permission;
+
+    @Getter @Setter
     private boolean permissionVisibility;
-    private String noPermissionMessage = "&cYou don't have permissions to do that";
+
+    @Getter @Setter
+    private String noPermissionMessage = "&cYou don't have permissions to do that!";
 
     public Icon() {
         this(ClickType.BOTH_CLICKS);
     }
 
-    public Icon(ClickType clickType) {
-        this(clickType, null);
+    public Icon(ClickType type) {
+        this(type, null);
     }
 
-    public Icon(ClickType clickType, IPermission permission) {
-        this(clickType, permission, false);
+    public Icon(ClickType type, IPermission permission) {
+        this(type, permission, false);
     }
 
-    public Icon(ClickType clickType, IPermission permission, boolean permissionVisibility) {
-        this.clickType = clickType;
+    public Icon(ClickType type, IPermission permission, boolean permissionVisibility) {
+        this.type = type;
         this.permission = permission;
         this.permissionVisibility = permissionVisibility;
     }
-
-    public ClickType getType() {
-        return clickType;
-    }
-
     public boolean havePermission() {
-        return permission != null;
-    }
-
-    public IPermission getPermission() {
-        return permission;
-    }
-
-    public void setPermission(IPermission permission) {
-        this.permission = permission;
-    }
-
-    public boolean isPermissionVisibility() {
-        return permissionVisibility;
-    }
-
-    public void setPermissionVisibility(boolean permissionVisibility) {
-        this.permissionVisibility = permissionVisibility;
-    }
-
-    public String getNoPermissionMessage() {
-        return noPermissionMessage;
-    }
-
-    public void setNoPermissionMessage(String noPermissionMessage) {
-        this.noPermissionMessage = noPermissionMessage;
+        return this.permission != null;
     }
 
     public boolean canSee(Player player) {
-        return !permissionVisibility || permission == null || permission.hasPermission(player);
+        return !this.permissionVisibility || this.permission == null || this.permission.hasPermission(player);
     }
 
     public Icon addClickAction(ActionHandler... actionHandlers) {
-        Collections.addAll(actions, actionHandlers);
-
+        Collections.addAll(this.actions, actionHandlers);
         return this;
     }
 
-    public Set<ActionHandler> getClickActions() {
-        return Collections.unmodifiableSet(actions);
+    public List<ActionHandler> getClickActions() {
+        return Collections.unmodifiableList(this.actions);
     }
 }

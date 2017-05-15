@@ -20,16 +20,17 @@ public class PacketUtils {
         for (int i = 0; i < len; i += 2) {
             data[i / 2] = (byte)((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
         }
+
         out.write(data);
     }
 
     public static void writeString(final DataOutputStream out, final String s, final Charset charset) throws IOException {
         if (charset == PacketUtils.UTF8) {
             writeVarInt(out, s.length());
-        }
-        else {
+        } else {
             out.writeShort(s.length());
         }
+
         out.write(s.getBytes(charset));
     }
 
@@ -53,6 +54,7 @@ public class PacketUtils {
             out.write((paramInt & 0x7F) | 0x80);
             paramInt >>>= 7;
         }
+
         out.write(paramInt);
     }
 

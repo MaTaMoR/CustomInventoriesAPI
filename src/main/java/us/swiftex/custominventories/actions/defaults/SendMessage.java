@@ -19,6 +19,6 @@ public class SendMessage extends ClickAction {
 
     @Override
     public void execute(Player player) {
-        player.sendMessage(Variable.replace(Utils.colorize(message), player));
+        player.sendMessage(Variable.replace(Utils.color(message), player));
     }
 }

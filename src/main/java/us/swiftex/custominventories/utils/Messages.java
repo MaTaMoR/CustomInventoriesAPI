@@ -86,7 +86,7 @@ public abstract class Messages<T> {
 
         @Override
         public String get() {
-            return Utils.colorize(super.get());
+            return Utils.color(super.get());
         }
 
         @Override
@@ -95,7 +95,7 @@ public abstract class Messages<T> {
         }
 
         public String replace(String toReplace, String replacement) {
-            return Utils.colorize(get().replace(toReplace, replacement));
+            return Utils.color(get().replace(toReplace, replacement));
         }
 
     }
@@ -108,7 +108,7 @@ public abstract class Messages<T> {
 
         @Override
         public List<String> get() {
-            return Utils.colorize(super.get());
+            return Utils.color(super.get());
         }
 
         @Override
@@ -123,7 +123,7 @@ public abstract class Messages<T> {
                 replaced.add(string.replace(toReplace, replacement));
             }
 
-            return Utils.colorize(replaced);
+            return Utils.color(replaced);
         }
     }
 }
