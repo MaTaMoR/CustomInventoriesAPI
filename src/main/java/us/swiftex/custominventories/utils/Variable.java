@@ -2,8 +2,6 @@ package us.swiftex.custominventories.utils;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import us.swiftex.custominventories.CustomInventories;
 import us.swiftex.custominventories.reflections.PlayerReflections;
 
 import java.text.DecimalFormat;
@@ -11,9 +9,9 @@ import java.util.*;
 
 public abstract class Variable implements LocalVariable {
 
-    private static Map<Plugin, Set<Variable>> variables = new HashMap<>();
+    private static final Set<Variable> variables = new HashSet<>();
 
-    public static final Variable NAME = register(CustomInventories.getPlugin(), new Variable("{name}") {
+    public static final Variable NAME = register(new Variable("{name}") {
 
         @Override
         public String getReplacement(Player player) {
@@ -22,7 +20,7 @@ public abstract class Variable implements LocalVariable {
 
     });
 
-    public static final Variable ONLINE_PLAYERS = register(CustomInventories.getPlugin(), new Variable("{online_players}", false) {
+    public static final Variable ONLINE_PLAYERS = register(new Variable("{online_players}", false) {
 
         @Override
         public String getReplacement(Player player) {
@@ -31,7 +29,7 @@ public abstract class Variable implements LocalVariable {
 
     });
 
-    public static final Variable MAX_HEALTH = register(CustomInventories.getPlugin(), new Variable("{max_health}") {
+    public static final Variable MAX_HEALTH = register(new Variable("{max_health}") {
 
         @Override
         public String getReplacement(Player player) {
@@ -40,7 +38,7 @@ public abstract class Variable implements LocalVariable {
 
     });
 
-    public static final Variable HEALTH = register(CustomInventories.getPlugin(), new Variable("{health") {
+    public static final Variable HEALTH = register(new Variable("{health") {
 
         @Override
         public String getReplacement(Player player) {
@@ -49,7 +47,7 @@ public abstract class Variable implements LocalVariable {
 
     });
 
-    public static final Variable LEVEL = register(CustomInventories.getPlugin(), new Variable("{level}") {
+    public static final Variable LEVEL = register(new Variable("{level}") {
 
         @Override
         public String getReplacement(Player player) {
@@ -58,7 +56,7 @@ public abstract class Variable implements LocalVariable {
 
     });
 
-    public static final Variable LOCATION = register(CustomInventories.getPlugin(), new Variable("{location}") {
+    public static final Variable LOCATION = register(new Variable("{location}") {
 
         @Override
         public String getReplacement(Player player) {
@@ -68,7 +66,7 @@ public abstract class Variable implements LocalVariable {
 
     });
 
-    public static final Variable PING = register(CustomInventories.getPlugin(), new Variable("{ping}") {
+    public static final Variable PING = register(new Variable("{ping}") {
         @Override
         public String getReplacement(Player player) {
             return String.valueOf(PlayerReflections.getPing(player));
@@ -91,58 +89,38 @@ public abstract class Variable implements LocalVariable {
 
     @Override
     public String getText() {
-        return text;
+        return this.text;
     }
 
     public boolean needPlayer() {
         return needPlayer;
     }
 
-    @Override
-    public boolean equals(Object object) {
-        return object != null && object instanceof Variable && text.equals(((Variable) object).getText());
-    }
+    public static Variable register(Variable variable) {
+        Validate.notNull(variable, "Variable can't be null!");
+        Validate.isFalse(variables.contains(variable), "Variable already registered!");
 
-    public static Variable register(Plugin plugin, Variable variable) {
-        Validate.notNull(variable, "Variable can't be null");
+        variables.add(variable);
 
-        Set<Variable> pluginVariables = variables.get(plugin);
-
-        if(pluginVariables == null) {
-            pluginVariables = new HashSet<>();
-            variables.put(plugin, pluginVariables);
-        }
-
-        pluginVariables.add(variable);
         return variable;
     }
 
-    public static void unregister(Plugin plugin, Variable variable) {
+    public static void unregister(Variable variable) {
         Validate.notNull(variable, "Variable can't be null");
 
-        Set<Variable> pluginVariables = variables.get(plugin);
-
-        if(pluginVariables == null) {
-            return;
-        }
-
-        pluginVariables.remove(variable);
-    }
-
-    public static Set<Variable> getPluginVariables(Plugin plugin) {
-        Set<Variable> pluginVariables = variables.get(plugin);
-        return (pluginVariables == null ? null : Collections.unmodifiableSet(pluginVariables));
+        variables.remove(variable);
     }
 
     public static String replace(String text) {
         Validate.notNull(text, "Text can't be null");
 
-        for(Variable variable : values()) {
-            if(variable.needPlayer()) {
-                continue;
-            }
+        for (Variable variable : variables) {
+            if (variable.needPlayer() || !text.contains(variable.getText())) continue;
 
-            text = text.replace(variable.getText(), variable.getReplacement(null));
+            String replacement = variable.getReplacement(null);
+            if (replacement == null) continue;
+
+            text = text.replace(variable.getText(), replacement);
         }
 
         return text;
@@ -150,22 +128,22 @@ public abstract class Variable implements LocalVariable {
 
     public static String replace(String text, Player player) {
         Validate.notNull(text, "Text can't be null");
+        Validate.notNull(player, "Player can't be null");
 
-        for(Variable variable : values()) {
-            text = text.replace(variable.getText(), variable.getReplacement(player));
+        for (Variable variable : variables) {
+            if (!text.contains(variable.getText())) continue;
+
+            String replacement = variable.getReplacement(player);
+            if (replacement == null) continue;
+
+            text = text.replace(variable.getText(), replacement);
         }
 
         return text;
     }
 
     public static Variable[] values() {
-        Set<Variable> values = new HashSet<>();
-
-        for(Set<Variable> variable : variables.values()) {
-            values.addAll(variable);
-        }
-
-        return values.toArray(new Variable[values.size()]);
+        return variables.toArray(new Variable[variables.size()]);
     }
 
     private static final DecimalFormat format = new DecimalFormat("##");

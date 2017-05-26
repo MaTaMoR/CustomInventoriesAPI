@@ -117,8 +117,8 @@ public class CustomItemSerializer implements JsonSerializer<CustomItem>, JsonDes
             data.add(Node.BANNER_PATTERNS, list);
         }
 
-        if(customItem.getItemGlow()) data.add(Node.GLOW, new JsonPrimitive(customItem.getItemGlow()));
-        if(customItem.getRemoveAttributes()) data.add(Node.REMOVE_ATTRIBUTES, new JsonPrimitive(customItem.getRemoveAttributes()));
+        if(customItem.isItemGlow()) data.add(Node.GLOW, new JsonPrimitive(true));
+        if(customItem.isRemoveAttributes()) data.add(Node.REMOVE_ATTRIBUTES, new JsonPrimitive(true));
 
         return data;
     }

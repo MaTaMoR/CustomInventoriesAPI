@@ -1,5 +1,7 @@
 package us.swiftex.custominventories.utils;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.*;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
@@ -26,30 +28,45 @@ import java.util.*;
 
 public class CustomItem implements Cloneable {
 
+    @Getter
     private Material material;
+
+    @Getter
     private short dataValue;
     private Amount amount;
 
+    @Getter @Setter
     private String name;
-    private List<String> lore;
-    private Map<Enchantment, Integer> enchantments;
+    private final List<String> lore = new ArrayList<>();
+    private final Map<Enchantment, Integer> enchantments = new HashMap<>();
+
+    @Getter @Setter
     private boolean itemGlow;
+
+    @Getter @Setter
     private boolean removeAttributes;
+
+    @Getter @Setter
     private boolean splash;
 
+    @Getter @Setter
     private Color color;
+
+    @Getter
     private SkullData skullData;
-    private List<PotionEffect> effects;
 
-    private Map<String, NBTTag> nbtData;
+    private final List<PotionEffect> effects = new ArrayList<>();
 
-    private Map<String, LocalVariable> localVariables;
+    private final Map<String, NBTTag> nbtData = new HashMap<>();
 
-    private List<CalculateEvent> calculateEvents;
+    private final Map<String, LocalVariable> localVariables = new HashMap<>();
 
+    private final List<CalculateEvent> calculateEvents = new ArrayList<>();
+
+    @Getter @Setter
     private DyeColor bannerBaseColor;
-    private List<Pattern> bannerPatterns;
 
+    private List<Pattern> bannerPatterns = new ArrayList<>();
 
     public CustomItem(Material material) {
         this(material, new SimpleAmount(1), (short) 0);
@@ -74,18 +91,13 @@ public class CustomItem implements Cloneable {
         this.material = material;
         this.amount = (amount == null ? new SimpleAmount(0) : amount);
         this.dataValue = dataValue;
-        this.enchantments = new HashMap<>();
-
-        this.nbtData = new HashMap<>();
     }
 
     public void setMaterial(Material material) {
-        if(material == Material.AIR) material = null;
-        this.material = material;
-    }
+        Validate.notNull(material, "Material can't be null");
+        Validate.isFalse(material == Material.AIR, "Material can't be Air");
 
-    public Material getMaterial() {
-        return material;
+        this.material = material;
     }
 
     @Deprecated
@@ -100,163 +112,138 @@ public class CustomItem implements Cloneable {
     }
 
     public void setAmount(Amount amount) {
-        if(amount == null) return;
+        Validate.notNull(amount, "Amount can't be null");
+
         this.amount = amount;
     }
 
     @Deprecated
     public int getAmount() {
-        return amount.getAmount();
+        return this.amount.getAmount();
     }
 
     public Amount getActualAmount() {
-        return amount;
+        return this.amount;
     }
 
     public void setDataValue(short dataValue) {
-        if(0 > dataValue) dataValue = 0;
+        if (0 > dataValue) {
+            dataValue = 0;
+        }
+
         this.dataValue = dataValue;
     }
 
-    public short getDataValue() {
-        return dataValue;
-    }
-
     public void registerLocalVariable(LocalVariable variable) {
-        if(localVariables == null) localVariables = new HashMap<>();
-        localVariables.put(variable.getText(), variable);
+        Validate.notNull(variable, "LocalVariable can't be null");
+
+        this.localVariables.put(variable.getText(), variable);
     }
 
     public void unregisterLocalVariable(String name) {
-        if(localVariables == null) return;
-        localVariables.remove(name);
+        Validate.notNull(name, "Name can't be null");
+
+        this.localVariables.remove(name);
     }
 
-
     public Collection<LocalVariable> getLocalVariables() {
-        if(localVariables == null) return new ArrayList<>();
-        return localVariables.values();
+        return this.localVariables.values();
     }
 
     public boolean hasLocalVariables() {
-        return localVariables != null && localVariables.size() > 0;
+        return this.localVariables != null && this.localVariables.size() > 0;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void clearLocalVariables() {
+        this.localVariables.clear();
     }
 
     public boolean hasName() {
-        return name != null;
-    }
-
-    public String getName() {
-        return name;
+        return this.name != null;
     }
 
     public void setLore(String... lore) {
-        if(lore != null) setLore(Arrays.asList(lore));
+        if (lore != null && lore.length > 0) setLore(Arrays.asList(lore));
     }
 
     public void setLore(List<String> lore) {
-        this.lore = lore;
+        Validate.notNull(lore, "Lore can't be null");
+
+        this.lore.clear();
+        this.lore.addAll(lore);
     }
 
     public boolean hasLore() {
-        return lore != null && !lore.isEmpty();
+        return !this.lore.isEmpty();
     }
 
     public List<String> getLore() {
-        if(lore == null) return new ArrayList<>();
-        return lore;
+        return this.lore;
+    }
+
+    public void clearLore() {
+        this.lore.clear();
     }
 
     public void setEnchantments(Map<Enchantment, Integer> enchantments) {
-        if(enchantments == null) {
-            clearEnchantments();
-            return;
-        }
+        Validate.notNull(enchantments, "Enchantments can't be null");
 
-        this.enchantments = enchantments;
+        this.enchantments.putAll(enchantments);
     }
 
     public boolean hasEnchantments() {
         return !this.enchantments.isEmpty();
     }
 
-    public Map<Enchantment, Integer> getEnchantments() {
-        return enchantments;
-    }
-
     public void addEnchantment(Enchantment enchantment) {
+        Validate.notNull(enchantment, "Enchantment can't be null");
+
         addEnchantment(enchantment, 1);
     }
 
     public void addEnchantment(Enchantment enchantment, int level) {
-        enchantments.put(enchantment, level);
+        Validate.notNull(enchantment, "Enchantment can't be null");
+
+        this.enchantments.put(enchantment, level);
     }
 
     public void removeEnchantment(Enchantment enchantment) {
-        enchantments.remove(enchantment);
+        Validate.notNull(enchantment, "Enchantment can't be null");
+
+        this.enchantments.remove(enchantment);
     }
 
     public int getEnchantment(Enchantment enchantment) {
-        if(enchantments.containsKey(enchantment)) return enchantments.get(enchantment);
+        Validate.notNull(enchantment, "Enchantment can't be null");
 
-        return -1;
+        return (this.enchantments.getOrDefault(enchantment, -1));
+    }
+
+    public Map<Enchantment, Integer> getEnchantments() {
+        return this.enchantments;
     }
 
     public void clearEnchantments() {
-        enchantments.clear();
+        this.enchantments.clear();
     }
 
     public boolean hasColor() {
-        return color != null;
-    }
-
-    public Color getColor() {
-        return color;
-    }
-
-    public void setColor(Color color) {
-        this.color = color;
-    }
-
-    public boolean hasSkullData() {
-        return skullData != null;
-    }
-
-    public SkullData getSkullData() {
-        return skullData;
+        return this.color != null;
     }
 
     @Deprecated
     public void setSkullOwner(String skullOwner) {
-        if(skullOwner == null) {
-            this.skullData = null;
-        } else {
-            this.skullData = new SkullData(skullOwner, SkullDataType.NAME);
-        }
+        Validate.notNull(skullOwner, "SkullOwner can't be null");
+
+        this.skullData = new SkullData(skullOwner, SkullDataType.NAME);
     }
 
     public void setSkullData(SkullData skullData) {
         this.skullData = skullData;
     }
 
-    public boolean getItemGlow() {
-        return itemGlow;
-    }
-
-    public void setItemGlow(boolean itemGlow) {
-        this.itemGlow = itemGlow;
-    }
-
-    public boolean getRemoveAttributes() {
-        return removeAttributes;
-    }
-
-    public void setRemoveAttributes(boolean removeAttributes) {
-        this.removeAttributes = removeAttributes;
+    public boolean hasSkullData() {
+        return this.skullData != null;
     }
 
     @Deprecated
@@ -274,145 +261,138 @@ public class CustomItem implements Cloneable {
         Validate.notNull(key, "The key can't be null");
         Validate.notNull(value, "The value can't be null");
 
-        nbtData.put(key, value);
+        this.nbtData.put(key, value);
     }
 
     public void setNBTContent(Map<String, NBTTag> content) {
         Validate.notNull(content, "The content can't be null");
 
-        nbtData.putAll(content);
+        this.nbtData.putAll(content);
     }
 
     public boolean hasNBTKey(String key) {
-        return nbtData.containsKey(key);
+        Validate.notNull(key, "Key can't be null");
+
+        return this.nbtData.containsKey(key);
     }
 
     public NBTTag getNBTData(String key) {
-        return nbtData.get(key);
+        Validate.notNull(key, "Key can't be null");
+
+        return this.nbtData.get(key);
     }
 
     public void removeNBTData(String key) {
-        nbtData.remove(key);
+        Validate.notNull(key, "Key can't be null");
+
+        this.nbtData.remove(key);
     }
 
     public Map<String, NBTTag> getNBTContent() {
-        return Collections.unmodifiableMap(nbtData);
+        return this.nbtData;
     }
 
     public void setPotionEffects(PotionEffect... effects) {
-        if(effects != null) setPotionEffects(Arrays.asList(effects));
+        if (effects != null) setPotionEffects(Arrays.asList(effects));
     }
 
     public void setPotionEffects(List<PotionEffect> effects) {
-        this.effects = effects;
+        Validate.notNull(effects, "Effects can't be null");
+
+        this.effects.addAll(effects);
     }
 
     public void addPotionEffect(PotionEffect effect) {
-        if(effect == null) return;
+        Validate.notNull(effect, "Effect can't be null");
 
-        if(effects == null) effects = new ArrayList<>();
-        effects.add(effect);
+        this.effects.add(effect);
     }
 
     public void removePotionEffect(PotionEffect effect) {
-        if(effect == null || effects == null) return;
-        effects.remove(effect);
+        Validate.notNull(effect, "Effect can't be null");
+
+        this.effects.remove(effect);
     }
 
     public boolean hasPotionEffects() {
-        return effects != null && effects.size() > 0;
+        return this.effects != null && this.effects.size() > 0;
     }
 
     public List<PotionEffect> getPotionEffects() {
-        if(effects == null) return new ArrayList<>();
-
-        return effects;
+        return this.effects;
     }
 
-    public boolean isSplash() {
-        return splash;
-    }
-
-    public void setSplash(boolean splash) {
-        this.splash = splash;
-    }
-
-    public void setBannerBaseColor(DyeColor bannerBaseColor) {
-        this.bannerBaseColor = bannerBaseColor;
+    public void clearPotionEffects() {
+        this.effects.clear();
     }
 
     public boolean hasBannerBaseColor() {
         return this.bannerBaseColor != null;
     }
 
-    public DyeColor getBannerBaseColor() {
-        return this.bannerBaseColor;
-    }
-
     public void addBannerPattern(Pattern pattern) {
-        if(pattern == null) return;
-        if(this.bannerPatterns == null) this.bannerPatterns = new ArrayList<>();
+        Validate.notNull(pattern, "Pattern can't be null");
 
         this.bannerPatterns.add(pattern);
     }
 
     public boolean hasBannerPatterns() {
-        return this.bannerPatterns != null && !this.bannerPatterns.isEmpty();
+        return !this.bannerPatterns.isEmpty();
     }
 
     public boolean hasBannerPattern(Pattern pattern) {
-        return this.bannerPatterns != null && this.bannerPatterns.contains(pattern);
+        return this.bannerPatterns.contains(pattern);
     }
 
     public void setBannerPatterns(List<Pattern> bannerPatterns) {
-        if(bannerPatterns == null) {
-            this.bannerPatterns = null;
-        } else {
-            this.bannerPatterns = bannerPatterns;
-        }
+        Validate.notNull(bannerPatterns, "Banner patterns can't be null");
+
+        this.bannerPatterns.clear();
+        this.bannerPatterns.addAll(bannerPatterns);
     }
 
     public List<Pattern> getBannerPatterns() {
-        if(this.bannerPatterns == null) return new ArrayList<>();
         return this.bannerPatterns;
     }
 
+    public void clearBannerPatterns() {
+        this.bannerPatterns.clear();
+    }
+
     public void registerCalculateEvent(CalculateEvent event) {
-        if(calculateEvents == null) calculateEvents = new ArrayList<>();
-        calculateEvents.add(event);
+        Validate.notNull(event, "CalculateEvent can't be null");
+
+        this.calculateEvents.add(event);
     }
 
     public void unregisterCalculateEvent(CalculateEvent event) {
-        if(calculateEvents == null) return;
-        calculateEvents.remove(event);
-    }
+        Validate.notNull(event, "CalculateEvent can't be null");
 
-    public List<CalculateEvent> getCalculateEvents() {
-        if(calculateEvents == null) {
-            return new ArrayList<>();
-        }
-
-        return calculateEvents;
+        this.calculateEvents.remove(event);
     }
 
     public boolean hasCalculateEvents() {
-        return calculateEvents != null && calculateEvents.size() > 0;
+        return this.calculateEvents != null && this.calculateEvents.size() > 0;
+    }
+
+    public List<CalculateEvent> getCalculateEvents() {
+        return this.calculateEvents;
     }
 
     protected String calculateName(Player player) {
-        if(hasName()) {
+        if (hasName()) {
             String name = this.name;
 
             name = ServerVariable.replace(name);
             if (player != null) {
-                for(LocalVariable variable : getLocalVariables()) {
+                for (LocalVariable variable : getLocalVariables()) {
                     name = name.replace(variable.getText(), variable.getReplacement(player));
                 }
 
                 name = Variable.replace(name, player);
             }
 
-            if(hasCalculateEvents()) {
+            if (hasCalculateEvents()) {
                 for (CalculateEvent event : calculateEvents) {
                     name = event.calculate(CalculateType.NAME, name);
                 }
@@ -433,7 +413,7 @@ public class CustomItem implements Cloneable {
         List<String> output = new ArrayList<>();
 
         if (hasLore()) {
-            for(String line : this.lore) {
+            for (String line : this.lore) {
                 lore.add(ServerVariable.replace(line));
             }
 
@@ -445,8 +425,8 @@ public class CustomItem implements Cloneable {
 
                     line = Variable.replace(line, player);
 
-                    if(hasCalculateEvents()) {
-                        for(CalculateEvent event : calculateEvents) {
+                    if (hasCalculateEvents()) {
+                        for (CalculateEvent event : calculateEvents) {
                             line = event.calculate(CalculateType.LORE, line);
                         }
                     }
@@ -456,14 +436,14 @@ public class CustomItem implements Cloneable {
                     }
                 }
             } else {
-                for(String line : lore) {
-                    if(hasCalculateEvents()) {
-                        for(CalculateEvent event : calculateEvents) {
+                for (String line : lore) {
+                    if (hasCalculateEvents()) {
+                        for (CalculateEvent event : calculateEvents) {
                             line = event.calculate(CalculateType.LORE, line);
                         }
                     }
 
-                    if(line != null) {
+                    if (line != null) {
                         output.add(line);
                     }
                 }
@@ -486,67 +466,72 @@ public class CustomItem implements Cloneable {
     }
 
     public ItemStack build(Player player) {
-        ItemStack itemStack = (material == null ? new ItemStack(Material.BEDROCK) : new ItemStack(material, amount.getAmount(), dataValue));
+        ItemStack itemStack = (this.material == null ? new ItemStack(Material.BEDROCK) : new ItemStack(this.material, this.amount.getAmount(), this.dataValue));
 
         ItemMeta itemMeta = itemStack.getItemMeta();
 
-        if(hasName()) itemMeta.setDisplayName(Utils.color(calculateName(player)));
+        if (hasName()) itemMeta.setDisplayName(Utils.color(calculateName(player)));
 
-        if(hasLore()) itemMeta.setLore(Utils.color(calculateLore(player)));
+        if (hasLore()) itemMeta.setLore(Utils.color(calculateLore(player)));
 
-        if(hasColor() && itemMeta instanceof LeatherArmorMeta) ((LeatherArmorMeta) itemMeta).setColor(color);
+        if (hasColor() && itemMeta instanceof LeatherArmorMeta) {
+            ((LeatherArmorMeta) itemMeta).setColor(this.color);
+        }
 
-        if(enchantments.size() > 0) {
+        if (hasEnchantments()) {
             if (itemMeta instanceof EnchantmentStorageMeta) {
                 EnchantmentStorageMeta storageMeta = (EnchantmentStorageMeta) itemMeta;
 
-                for (Map.Entry<Enchantment, Integer> entry : enchantments.entrySet()) {
+                for (Map.Entry<Enchantment, Integer> entry : this.enchantments.entrySet()) {
                     storageMeta.addStoredEnchant(entry.getKey(), entry.getValue(), true);
                 }
             } else {
-                for (Map.Entry<Enchantment, Integer> entry : enchantments.entrySet()) {
+                for (Map.Entry<Enchantment, Integer> entry : this.enchantments.entrySet()) {
                     itemMeta.addEnchant(entry.getKey(), entry.getValue(), true);
                 }
             }
         }
 
-        if(hasPotionEffects() && itemMeta instanceof PotionMeta) {
+        if (hasPotionEffects() && itemMeta instanceof PotionMeta) {
             PotionType potionType = PotionType.getByEffect(getPotionEffects().get(0).getType());
 
             Potion potion = new Potion(potionType);
-            potion.setSplash(splash);
+            potion.setSplash(this.splash);
 
             potion.apply(itemStack);
 
             PotionMeta potionMeta = (PotionMeta) itemMeta;
 
-            for(PotionEffect effect : getPotionEffects()) potionMeta.addCustomEffect(effect, true);
+            for (PotionEffect effect : getPotionEffects()) {
+                potionMeta.addCustomEffect(effect, true);
+            }
 
-            if(!getRemoveAttributes() && potionType == null) {
-                List<String> lore = (itemMeta.hasLore() ? itemMeta.getLore() : new ArrayList<String>());
-                for(PotionEffect effect : effects) lore.add(PotionUtils.getDescription(effect));
+            if (!isRemoveAttributes() && potionType == null) {
+                List<String> lore = (itemMeta.hasLore() ? itemMeta.getLore() : new ArrayList<>());
+
+                this.effects.forEach(e -> lore.add(PotionUtils.getDescription(e)));
 
                 itemMeta.setLore(lore);
             }
         }
 
-        if(itemMeta instanceof BannerMeta) {
+        if (itemMeta instanceof BannerMeta) {
             BannerMeta bannerMeta = (BannerMeta) itemMeta;
 
-            bannerMeta.setBaseColor(this.bannerBaseColor);
+            if (hasBannerBaseColor()) bannerMeta.setBaseColor(this.bannerBaseColor);
 
-            if(hasBannerPatterns()) for(Pattern pattern : this.bannerPatterns) bannerMeta.addPattern(pattern);
+            if (hasBannerPatterns()) this.bannerPatterns.forEach(bannerMeta::addPattern);
         }
 
         itemStack.setItemMeta(itemMeta);
 
-        if(hasSkullData() && itemMeta instanceof SkullMeta) skullData.apply(itemStack);
+        if (hasSkullData() && itemMeta instanceof SkullMeta) this.skullData.apply(itemStack);
 
-        if(nbtData.size() > 0) itemStack = ItemReflections.setContent(itemStack, nbtData);
+        if (this.nbtData.size() > 0) itemStack = ItemReflections.setContent(itemStack, this.nbtData);
 
-        if(itemGlow && enchantments.isEmpty()) itemStack = ItemReflections.setItemGlow(itemStack);
+        if (this.itemGlow && this.enchantments.isEmpty()) itemStack = ItemReflections.setItemGlow(itemStack);
 
-        if(removeAttributes) itemStack = AttributeRemover.hideAttributes(itemStack);
+        if (this.removeAttributes) itemStack = AttributeRemover.hideAttributes(itemStack);
 
         return itemStack;
     }
@@ -766,24 +751,24 @@ public class CustomItem implements Cloneable {
 
         StringBuilder material = new StringBuilder();
 
-        if(customItem.getMaterial() == null) {
+        if (customItem.getMaterial() == null) {
             material.append(Material.BEDROCK.name());
         } else {
             material.append(customItem.getMaterial().name());
         }
 
-        if(customItem.getDataValue() > 0) material.append(":").append(customItem.getDataValue());
+        if (customItem.getDataValue() > 0) material.append(":").append(customItem.getDataValue());
 
         serialized.put(Node.MATERIAL, material.toString());
         serialized.put(Node.AMOUNT, AmountUtil.serialize(customItem.getActualAmount()));
 
-        if(customItem.hasName()) serialized.put(Node.NAME, (customItem.getName() == null ? "" : customItem.getName()));
-        if(customItem.hasLore()) serialized.put(Node.LORE, customItem.getLore());
-        if(customItem.hasEnchantments()) serialized.put(Node.ENCHANT, serializeEnchantments(customItem.getEnchantments()));
+        if (customItem.hasName()) serialized.put(Node.NAME, (customItem.getName() == null ? "" : customItem.getName()));
+        if (customItem.hasLore()) serialized.put(Node.LORE, customItem.getLore());
+        if (customItem.hasEnchantments()) serialized.put(Node.ENCHANT, serializeEnchantments(customItem.getEnchantments()));
 
-        if(customItem.hasColor()) serialized.put(Node.COLOR, serializeColor(customItem.getColor()));
+        if (customItem.hasColor()) serialized.put(Node.COLOR, serializeColor(customItem.getColor()));
 
-        if(customItem.hasSkullData()) {
+        if (customItem.hasSkullData()) {
             Map<String, Object> skullData = new HashMap<>();
 
             skullData.put("Value", customItem.getSkullData().getValue());
@@ -792,16 +777,16 @@ public class CustomItem implements Cloneable {
             serialized.put(Node.SKULL_OWNER, skullData);
         }
 
-        if(customItem.hasPotionEffects()) {
+        if (customItem.hasPotionEffects()) {
             serialized.put(Node.SPLASH, customItem.isSplash());
             serialized.put(Node.EFFECTS, serializeEffects(customItem.getPotionEffects()));
         }
 
-        if(customItem.hasBannerBaseColor()) serialized.put(Node.BANNER_BASE_COLOR, customItem.getBannerBaseColor().name());
-        if(customItem.hasBannerPatterns()) serialized.put(Node.BANNER_PATTERNS, serializePatterns(customItem.getBannerPatterns()));
+        if (customItem.hasBannerBaseColor()) serialized.put(Node.BANNER_BASE_COLOR, customItem.getBannerBaseColor().name());
+        if (customItem.hasBannerPatterns()) serialized.put(Node.BANNER_PATTERNS, serializePatterns(customItem.getBannerPatterns()));
 
-        if(customItem.getItemGlow()) serialized.put(Node.GLOW, customItem.getItemGlow());
-        if(customItem.getRemoveAttributes()) serialized.put(Node.REMOVE_ATTRIBUTES, customItem.getRemoveAttributes());
+        if (customItem.isItemGlow()) serialized.put(Node.GLOW, true);
+        if (customItem.isRemoveAttributes()) serialized.put(Node.REMOVE_ATTRIBUTES, true);
 
         return serialized;
     }
@@ -810,10 +795,10 @@ public class CustomItem implements Cloneable {
         Material material = null;
         short itemValue = 0;
 
-        if(section.isSet(Node.MATERIAL)) {
+        if (section.isSet(Node.MATERIAL)) {
             String materialData = section.getString(Node.MATERIAL);
 
-            if(materialData.contains(":")) {
+            if (materialData.contains(":")) {
                 String[] args = materialData.split(":");
 
                 try {
@@ -829,7 +814,7 @@ public class CustomItem implements Cloneable {
         }
 
         Amount amount = new SimpleAmount(1);
-        if(section.isSet(Node.AMOUNT)) {
+        if (section.isSet(Node.AMOUNT)) {
             amount = AmountUtil.deserialize(CastUtils.asString(section.get(Node.AMOUNT)));
         }
 
@@ -842,10 +827,10 @@ public class CustomItem implements Cloneable {
 
         SkullData skullData = null;
 
-        if(section.isSet(Node.SKULL_OWNER)) {
+        if (section.isSet(Node.SKULL_OWNER)) {
             Map<String, Object> map = ((MemorySection) section.get(Node.SKULL_OWNER)).getValues(true);
 
-            if(map.containsKey("Value") && map.containsKey("Type")) {
+            if (map.containsKey("Value") && map.containsKey("Type")) {
                 skullData = new SkullData((String) map.get("Value"), SkullDataType.getByName((String) map.get("Type")));
             }
         }
@@ -856,19 +841,58 @@ public class CustomItem implements Cloneable {
 
         List<PotionEffect> effects = null;
 
-        if(section.isSet(Node.EFFECTS)) effects = deserializeEffects(section.getStringList(Node.EFFECTS));
+        if (section.isSet(Node.EFFECTS)) effects = deserializeEffects(section.getStringList(Node.EFFECTS));
 
         DyeColor bannerBaseColor = null;
 
-        if(section.isSet(Node.BANNER_BASE_COLOR)) bannerBaseColor = DyeColor.valueOf(section.getString(Node.BANNER_BASE_COLOR));
+        if (section.isSet(Node.BANNER_BASE_COLOR)) bannerBaseColor = DyeColor.valueOf(section.getString(Node.BANNER_BASE_COLOR));
 
         List<Pattern> bannerPatterns = null;
 
-        if(section.isSet(Node.BANNER_PATTERNS)) bannerPatterns = deserialize(section.getStringList(Node.BANNER_PATTERNS));
+        if (section.isSet(Node.BANNER_PATTERNS)) bannerPatterns = deserializePatterns(section.getStringList(Node.BANNER_PATTERNS));
 
-        return CustomItem.builder(material, amount, itemValue).setName(name).setLore(lore).setEnchantments(enchantments)
-                .setColor(color).setSkullData(skullData).setItemGlow(glow).setRemoveAttributes(removeAttributes).setSplash(splash)
-                    .setPotionEffects(effects).setBannerBaseColor(bannerBaseColor).setBannerPatterns(bannerPatterns).build();
+        //Build CustomItem with all the data deserialized.
+
+        Builder builder = CustomItem.builder(material, amount, itemValue);
+
+        if (name != null) {
+            builder.setName(name);
+        }
+
+        if (lore != null) {
+            builder.setLore(lore);
+        }
+
+        if (enchantments != null) {
+            builder.setEnchantments(enchantments);
+        }
+
+        if (color != null) {
+            builder.setColor(color);
+        }
+
+        if (skullData != null) {
+            builder.setSkullData(skullData);
+        }
+
+        builder.setItemGlow(glow);
+        builder.setRemoveAttributes(removeAttributes);
+        builder.setSplash(splash);
+
+        if (effects != null) {
+            builder.setPotionEffects(effects);
+        }
+
+        if (bannerBaseColor != null) {
+            builder.setBannerBaseColor(bannerBaseColor);
+        }
+
+        if (bannerPatterns != null) {
+            builder.setBannerPatterns(bannerPatterns);
+        }
+
+
+        return builder.build();
     }
 
     @SuppressWarnings("Unchecked")
@@ -895,7 +919,7 @@ public class CustomItem implements Cloneable {
         }
 
         Amount amount = new SimpleAmount(1);
-        if(section.containsKey(Node.AMOUNT)) amount = AmountUtil.deserialize(CastUtils.asString(section.get(Node.AMOUNT)));
+        if (section.containsKey(Node.AMOUNT)) amount = AmountUtil.deserialize(CastUtils.asString(section.get(Node.AMOUNT)));
 
         String name = null;
         if (section.containsKey(Node.NAME)) {
@@ -904,69 +928,108 @@ public class CustomItem implements Cloneable {
 
         List<String> lore = null;
 
-        if(section.containsKey(Node.LORE)) {
+        if (section.containsKey(Node.LORE)) {
             lore = (List<String>) section.get(Node.LORE);
         }
 
         Map<Enchantment, Integer> enchantments = null;
 
-        if(section.containsKey(Node.ENCHANT)) {
+        if (section.containsKey(Node.ENCHANT)) {
             enchantments = deserializeEnchantment((List<String>) section.get(Node.ENCHANT));
         }
 
         Color color = null;
 
-        if(section.containsKey(Node.COLOR)) {
+        if (section.containsKey(Node.COLOR)) {
             color = Color.deserialize((Map<String, Object>) section.get(Node.COLOR));
         }
 
         SkullData skullData = null;
 
-        if(section.containsKey(Node.SKULL_OWNER)) {
+        if (section.containsKey(Node.SKULL_OWNER)) {
             Map<String, Object> map = ((MemorySection) section.get(Node.SKULL_OWNER)).getValues(true);
 
-            if(map.containsKey("Value") && map.containsKey("Type")) {
+            if (map.containsKey("Value") && map.containsKey("Type")) {
                 skullData = new SkullData((String) map.get("Value"), SkullDataType.getByName((String) map.get("Type")));
             }
         }
 
         boolean glow = false;
 
-        if(section.containsKey(Node.GLOW)) {
+        if (section.containsKey(Node.GLOW)) {
             glow = CastUtils.asBoolean(section.get(Node.GLOW));
         }
 
         boolean removeAttributes = false;
 
-        if(section.containsKey(Node.REMOVE_ATTRIBUTES)) {
+        if (section.containsKey(Node.REMOVE_ATTRIBUTES)) {
             removeAttributes = CastUtils.asBoolean(section.get(Node.REMOVE_ATTRIBUTES));
         }
 
         boolean splash = false;
 
-        if(section.containsKey(Node.SPLASH)) {
+        if (section.containsKey(Node.SPLASH)) {
             splash = CastUtils.asBoolean(section.get(Node.SPLASH));
         }
 
         List<PotionEffect> effects = null;
 
-        if(section.containsKey(Node.EFFECTS)) {
+        if (section.containsKey(Node.EFFECTS)) {
             effects = deserializeEffects((List<String>) section.get(Node.EFFECTS));
         }
 
-        if(section.containsKey(Node.EFFECTS)) effects = deserializeEffects((List<String>) section.get(Node.EFFECTS));
+        if (section.containsKey(Node.EFFECTS)) effects = deserializeEffects((List<String>) section.get(Node.EFFECTS));
 
         DyeColor bannerBaseColor = null;
 
-        if(section.containsKey(Node.BANNER_BASE_COLOR)) bannerBaseColor = DyeColor.valueOf(CastUtils.asString(section.get(Node.BANNER_BASE_COLOR)));
+        if (section.containsKey(Node.BANNER_BASE_COLOR)) bannerBaseColor = DyeColor.valueOf(CastUtils.asString(section.get(Node.BANNER_BASE_COLOR)));
 
         List<Pattern> bannerPatterns = null;
 
-        if(section.containsKey(Node.BANNER_PATTERNS)) bannerPatterns = deserialize((List<String>) section.get(Node.BANNER_PATTERNS));
+        if (section.containsKey(Node.BANNER_PATTERNS)) bannerPatterns = deserializePatterns((List<String>) section.get(Node.BANNER_PATTERNS));
 
-        return CustomItem.builder(material, amount, itemValue).setName(name).setLore(lore).setEnchantments(enchantments)
-                .setColor(color).setSkullData(skullData).setItemGlow(glow).setRemoveAttributes(removeAttributes).setSplash(splash)
-                    .setPotionEffects(effects).setBannerBaseColor(bannerBaseColor).setBannerPatterns(bannerPatterns).build();
+        //Build CustomItem with all the data deserialized.
+
+        Builder builder = CustomItem.builder(material, amount, itemValue);
+
+        if (name != null) {
+            builder.setName(name);
+        }
+
+        if (lore != null) {
+            builder.setLore(lore);
+        }
+
+        if (enchantments != null) {
+            builder.setEnchantments(enchantments);
+        }
+
+        if (color != null) {
+            builder.setColor(color);
+        }
+
+        if (skullData != null) {
+            builder.setSkullData(skullData);
+        }
+
+        builder.setItemGlow(glow);
+        builder.setRemoveAttributes(removeAttributes);
+        builder.setSplash(splash);
+
+        if (effects != null) {
+            builder.setPotionEffects(effects);
+        }
+
+        if (bannerBaseColor != null) {
+            builder.setBannerBaseColor(bannerBaseColor);
+        }
+
+        if (bannerPatterns != null) {
+            builder.setBannerPatterns(bannerPatterns);
+        }
+
+
+        return builder.build();
     }
 
     private static Map<String, Object> serializeColor(Color color) {
@@ -982,7 +1045,7 @@ public class CustomItem implements Cloneable {
     private static List<String> serializeEnchantments(Map<Enchantment, Integer> enchants) {
         List<String> serialized = new ArrayList<>();
 
-        for(Map.Entry<Enchantment, Integer> entry : enchants.entrySet()) {
+        for (Map.Entry<Enchantment, Integer> entry : enchants.entrySet()) {
             serialized.add(entry.getKey().getName() + ":" + entry.getValue());
         }
 
@@ -992,11 +1055,11 @@ public class CustomItem implements Cloneable {
     private static Map<Enchantment, Integer> deserializeEnchantment(List<String> serialized) {
         Map<Enchantment, Integer> deserialized = new HashMap<>();
 
-        for(String entry : serialized) {
+        for (String entry : serialized) {
 
             int level = 1;
 
-            if(entry.contains(":")) {
+            if (entry.contains(":")) {
                 String[] args = entry.split(":");
 
                 try {
@@ -1009,7 +1072,7 @@ public class CustomItem implements Cloneable {
             }
 
             Enchantment enchantment = Enchantment.getByName(entry);
-            if(enchantment == null) continue;
+            if (enchantment == null) continue;
 
             deserialized.put(enchantment, level);
         }
@@ -1021,7 +1084,7 @@ public class CustomItem implements Cloneable {
     private static List<String> serializeEffects(List<PotionEffect> potionEffects) {
         List<String> serialized = new ArrayList<>();
 
-        for(PotionEffect potionEffect : potionEffects) {
+        for (PotionEffect potionEffect : potionEffects) {
             serialized.add(potionEffect.getType().getName() + ":" + potionEffect.getAmplifier() + "-" + potionEffect.getDuration());
         }
 
@@ -1031,12 +1094,12 @@ public class CustomItem implements Cloneable {
     private static List<PotionEffect> deserializeEffects(List<String> serialized) {
         List<PotionEffect> deserialized = new ArrayList<>();
 
-        for(String entry : serialized) {
+        for (String entry : serialized) {
 
             int amplifier = 0;
             int seconds = 0;
 
-            if(entry.contains("-")) {
+            if (entry.contains("-")) {
                 String[] args = entry.split("-");
 
                 try {
@@ -1048,7 +1111,7 @@ public class CustomItem implements Cloneable {
                 entry = args[0];
             }
 
-            if(entry.contains(":")) {
+            if (entry.contains(":")) {
                 String[] args = entry.split(":");
 
                 try {
@@ -1061,7 +1124,7 @@ public class CustomItem implements Cloneable {
             }
 
             PotionEffectType effectType = PotionEffectType.getByName(entry);
-            if(effectType == null) continue;
+            if (effectType == null) continue;
 
             deserialized.add(new PotionEffect(effectType, seconds, amplifier));
         }
@@ -1072,20 +1135,20 @@ public class CustomItem implements Cloneable {
     private static List<String> serializePatterns(List<Pattern> patterns) {
         List<String> serialized = new ArrayList<>();
 
-        for(Pattern pattern : patterns) {
+        for (Pattern pattern : patterns) {
             serialized.add(pattern.getColor().toString() + ":" + pattern.getPattern().getIdentifier());
         }
 
         return serialized;
     }
 
-    private static List<Pattern> deserialize(List<String> serialized) {
+    private static List<Pattern> deserializePatterns(List<String> serialized) {
         List<Pattern> patterns = new ArrayList<>();
 
-        for(String string : serialized) {
+        for (String string : serialized) {
             String[] split = string.split(":");
 
-            if(split.length == 2) {
+            if (split.length == 2) {
                 DyeColor color = DyeColor.valueOf(split[0]);
                 PatternType type = PatternType.getByIdentifier(split[1]);
 
@@ -1099,54 +1162,73 @@ public class CustomItem implements Cloneable {
     private static final String[] RESERVED_KEYS = { "ench", "CustomPotionEffects" };
 
     public static CustomItem toCustomItem(ItemStack itemStack) {
-        if(itemStack == null) return null;
+        if (itemStack == null) return null;
 
         CustomItem customItem = new CustomItem(itemStack.getType(), new SimpleAmount(itemStack.getAmount()), itemStack.getDurability());
 
         ItemMeta itemMeta = itemStack.getItemMeta();
 
-        customItem.setName(itemMeta.getDisplayName());
-        customItem.setLore(itemMeta.getLore());
+        if (itemMeta.hasDisplayName()) {
+            customItem.setName(itemMeta.getDisplayName());
+        }
 
-        if(itemMeta instanceof LeatherArmorMeta) customItem.setColor(((LeatherArmorMeta) itemMeta).getColor());
+        if (itemMeta.hasLore()) {
+            customItem.setLore(itemMeta.getLore());
+        }
 
-        if(itemMeta instanceof SkullMeta) {
+        if (itemMeta instanceof LeatherArmorMeta) {
+            customItem.setColor(((LeatherArmorMeta) itemMeta).getColor());
+        }
+
+        if (itemMeta instanceof SkullMeta) {
             String texture = ItemReflections.getTexture(itemStack);
-            if(texture == null) {
+            if (texture == null) {
                 SkullMeta skullMeta = (SkullMeta) itemMeta;
 
-                if(skullMeta.hasOwner()) customItem.setSkullData(new SkullData(skullMeta.getOwner(), SkullDataType.NAME));
+                if(skullMeta.hasOwner()) {
+                    customItem.setSkullData(new SkullData(skullMeta.getOwner(), SkullDataType.NAME));
+                }
             } else {
                 customItem.setSkullData(new SkullData(texture, SkullDataType.TEXTURE));
             }
         }
 
-        if(itemMeta instanceof EnchantmentStorageMeta) {
+        if (itemMeta instanceof EnchantmentStorageMeta) {
             customItem.setEnchantments(((EnchantmentStorageMeta) itemMeta).getStoredEnchants());
         } else {
             customItem.setEnchantments(itemStack.getEnchantments());
         }
 
-        if(itemMeta instanceof PotionMeta) {
+        if (itemMeta instanceof PotionMeta) {
             Potion potion = Potion.fromItemStack(itemStack);
-            customItem.setSplash(potion.isSplash());
+
+            if (potion != null) {
+                customItem.setSplash(potion.isSplash());
+            }
 
             PotionMeta potionMeta = (PotionMeta) itemMeta;
 
-            for(PotionEffect effect : potionMeta.getCustomEffects()) customItem.addPotionEffect(effect);
+            for (PotionEffect effect : potionMeta.getCustomEffects()) {
+                customItem.addPotionEffect(effect);
+            }
         }
 
-        if(itemMeta instanceof BannerMeta) {
+        if (itemMeta instanceof BannerMeta) {
             BannerMeta bannerMeta = (BannerMeta) itemMeta;
 
             customItem.setBannerBaseColor(bannerMeta.getBaseColor());
-            for(Pattern pattern : bannerMeta.getPatterns()) customItem.addBannerPattern(pattern);
+
+            for (Pattern pattern : bannerMeta.getPatterns()) {
+                customItem.addBannerPattern(pattern);
+            }
         }
 
         customItem.setItemGlow(ItemReflections.hasGlow(itemStack));
 
         Map<String, NBTTag> content = ItemReflections.getContent(itemStack);
-        for(String key : RESERVED_KEYS) content.remove(key);
+        for (String key : RESERVED_KEYS) {
+            content.remove(key);
+        }
 
         customItem.setNBTContent(content);
 
