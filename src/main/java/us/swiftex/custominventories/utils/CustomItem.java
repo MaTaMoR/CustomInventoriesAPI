@@ -9,6 +9,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.potion.Potion;
@@ -25,6 +26,7 @@ import us.swiftex.custominventories.utils.nbt.NBTType;
 import us.swiftex.custominventories.utils.server.ServerVariable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CustomItem implements Cloneable {
 
@@ -67,6 +69,8 @@ public class CustomItem implements Cloneable {
     private DyeColor bannerBaseColor;
 
     private List<Pattern> bannerPatterns = new ArrayList<>();
+
+    private List<ItemFlag> itemFlags = new ArrayList<>();
 
     public CustomItem(Material material) {
         this(material, new SimpleAmount(1), (short) 0);
@@ -188,6 +192,7 @@ public class CustomItem implements Cloneable {
     public void setEnchantments(Map<Enchantment, Integer> enchantments) {
         Validate.notNull(enchantments, "Enchantments can't be null");
 
+        this.enchantments.clear();
         this.enchantments.putAll(enchantments);
     }
 
@@ -379,6 +384,59 @@ public class CustomItem implements Cloneable {
         return this.calculateEvents;
     }
 
+    public void addItemFlags(ItemFlag... itemFlags) {
+        addItemFlags(Arrays.asList(itemFlags));
+    }
+
+    public void addItemFlags(List<ItemFlag> itemFlags) {
+        Validate.notNull(itemFlags, "ItemFlags can't be null");
+
+        this.itemFlags.addAll(itemFlags);
+    }
+
+    public void setItemFlags(ItemFlag... itemFlags) {
+        setItemFlags(Arrays.asList(itemFlags));
+    }
+
+    public void setItemFlags(List<ItemFlag> itemFlags) {
+        Validate.notNull(itemFlags, "ItemFlags can't be null");
+
+        this.itemFlags.clear();
+        this.itemFlags.addAll(itemFlags);
+    }
+
+    public boolean hasItemFlags() {
+        return this.itemFlags.size() > 0;
+    }
+
+    public boolean hasItemFlags(ItemFlag... itemFlag) {
+        return hasItemFlags(Arrays.asList(itemFlag));
+    }
+
+    public boolean hasItemFlags(List<ItemFlag> itemFlags) {
+        Validate.notNull(itemFlags, "ItemFlags can't be null");
+
+        return this.itemFlags.containsAll(itemFlags);
+    }
+
+    public void removeItemFlags(ItemFlag... itemFlags) {
+        removeItemFlags(Arrays.asList(itemFlags));
+    }
+
+    public void removeItemFlags(List<ItemFlag> itemFlags) {
+        Validate.notNull(itemFlags, "ItemFlags can't be null");
+
+        this.itemFlags.removeAll(itemFlags);
+    }
+
+    public List<ItemFlag> getItemFlags() {
+        return this.itemFlags;
+    }
+
+    public void clearItemFlags() {
+        this.itemFlags.clear();
+    }
+
     protected String calculateName(Player player) {
         if (hasName()) {
             String name = this.name;
@@ -492,6 +550,10 @@ public class CustomItem implements Cloneable {
             }
         }
 
+        if (this.itemFlags.size() > 0) {
+            this.itemFlags.forEach(itemMeta::addItemFlags);
+        }
+
         if (hasPotionEffects() && itemMeta instanceof PotionMeta) {
             PotionType potionType = PotionType.getByEffect(getPotionEffects().get(0).getType());
 
@@ -538,11 +600,68 @@ public class CustomItem implements Cloneable {
 
     @Override
     public CustomItem clone() {
-        try {
-            return (CustomItem) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
+        CustomItem cloned = new CustomItem(getMaterial(), getActualAmount(), getDataValue());
+
+        if (hasName()) {
+            cloned.setName(getName());
         }
+
+        if (hasLore()) {
+            cloned.setLore(getLore());
+        }
+
+        if (hasEnchantments()) {
+            cloned.setEnchantments(getEnchantments());
+        }
+
+        if (hasColor()) {
+            cloned.setColor(getColor());
+        }
+
+        if (hasSkullData()) {
+            cloned.setSkullData(getSkullData());
+        }
+
+        if (hasPotionEffects()) {
+            cloned.setPotionEffects(getPotionEffects());
+        }
+
+        if (isSplash()) {
+            cloned.setSplash(true);
+        }
+
+        if (hasBannerBaseColor()) {
+            cloned.setBannerBaseColor(getBannerBaseColor());
+        }
+
+        if (hasBannerPatterns()) {
+            cloned.setBannerPatterns(getBannerPatterns());
+        }
+
+        Map<String, NBTTag> content = getNBTContent();
+        content.forEach(cloned::setNBTData);
+
+        if (hasLocalVariables()) {
+            getLocalVariables().forEach(cloned::registerLocalVariable);
+        }
+
+        if (hasCalculateEvents()) {
+            getCalculateEvents().forEach(cloned::registerCalculateEvent);
+        }
+
+        if (isRemoveAttributes()) {
+            cloned.setRemoveAttributes(true);
+        }
+
+        if (isItemGlow()) {
+            cloned.setItemGlow(true);
+        }
+
+        if (hasItemFlags()) {
+            cloned.setItemFlags(getItemFlags());
+        }
+
+        return cloned;
     }
 
     public static class Builder {
@@ -693,6 +812,26 @@ public class CustomItem implements Cloneable {
             return this;
         }
 
+        public Builder addItemFlags(ItemFlag... itemFlags) {
+            this.customItem.addItemFlags(itemFlags);
+            return this;
+        }
+
+        public Builder addItemFlags(List<ItemFlag> itemFlags) {
+            this.customItem.addItemFlags(itemFlags);
+            return this;
+        }
+
+        public Builder setItemFlags(ItemFlag... itemFlags) {
+            this.customItem.setItemFlags(itemFlags);
+            return this;
+        }
+
+        public Builder setItemFlags(List<ItemFlag> itemFlags) {
+            this.customItem.setItemFlags(itemFlags);
+            return this;
+        }
+
         public CustomItem build() {
             return this.customItem;
         }
@@ -741,7 +880,8 @@ public class CustomItem implements Cloneable {
                 GLOW = "Glow",
                 REMOVE_ATTRIBUTES = "RemoveAttributes",
                 BANNER_BASE_COLOR = "BannerBaseColor",
-                BANNER_PATTERNS = "BannerPatterns";
+                BANNER_PATTERNS = "BannerPatterns",
+                ITEM_FLAGS = "ItemFlags";
     }
 
     public static Map<String, Object> serialize(CustomItem customItem) {
@@ -787,6 +927,7 @@ public class CustomItem implements Cloneable {
 
         if (customItem.isItemGlow()) serialized.put(Node.GLOW, true);
         if (customItem.isRemoveAttributes()) serialized.put(Node.REMOVE_ATTRIBUTES, true);
+        if (customItem.hasItemFlags()) serialized.put(Node.ITEM_FLAGS, serializedItemFlags(customItem.getItemFlags()));
 
         return serialized;
     }
@@ -851,6 +992,10 @@ public class CustomItem implements Cloneable {
 
         if (section.isSet(Node.BANNER_PATTERNS)) bannerPatterns = deserializePatterns(section.getStringList(Node.BANNER_PATTERNS));
 
+        List<ItemFlag> itemFlags = null;
+
+        if (section.isSet(Node.ITEM_FLAGS)) itemFlags = deserializeItemFlags(section.getStringList(Node.ITEM_FLAGS));
+
         //Build CustomItem with all the data deserialized.
 
         Builder builder = CustomItem.builder(material, amount, itemValue);
@@ -891,6 +1036,9 @@ public class CustomItem implements Cloneable {
             builder.setBannerPatterns(bannerPatterns);
         }
 
+        if (itemFlags != null) {
+            builder.setItemFlags(itemFlags);
+        }
 
         return builder.build();
     }
@@ -988,6 +1136,10 @@ public class CustomItem implements Cloneable {
 
         if (section.containsKey(Node.BANNER_PATTERNS)) bannerPatterns = deserializePatterns((List<String>) section.get(Node.BANNER_PATTERNS));
 
+        List<ItemFlag> itemFlags = null;
+
+        if (section.containsKey(Node.ITEM_FLAGS)) itemFlags = deserializeItemFlags((List<String>) section.get(Node.ITEM_FLAGS));
+
         //Build CustomItem with all the data deserialized.
 
         Builder builder = CustomItem.builder(material, amount, itemValue);
@@ -1028,6 +1180,9 @@ public class CustomItem implements Cloneable {
             builder.setBannerPatterns(bannerPatterns);
         }
 
+        if (itemFlags != null) {
+            builder.setItemFlags(itemFlags);
+        }
 
         return builder.build();
     }
@@ -1082,13 +1237,7 @@ public class CustomItem implements Cloneable {
     }
 
     private static List<String> serializeEffects(List<PotionEffect> potionEffects) {
-        List<String> serialized = new ArrayList<>();
-
-        for (PotionEffect potionEffect : potionEffects) {
-            serialized.add(potionEffect.getType().getName() + ":" + potionEffect.getAmplifier() + "-" + potionEffect.getDuration());
-        }
-
-        return serialized;
+        return potionEffects.stream().map(p -> p.getType().getName() + ":" + p.getAmplifier() + "-" + p.getDuration()).collect(Collectors.toList());
     }
 
     private static List<PotionEffect> deserializeEffects(List<String> serialized) {
@@ -1133,13 +1282,7 @@ public class CustomItem implements Cloneable {
     }
 
     private static List<String> serializePatterns(List<Pattern> patterns) {
-        List<String> serialized = new ArrayList<>();
-
-        for (Pattern pattern : patterns) {
-            serialized.add(pattern.getColor().toString() + ":" + pattern.getPattern().getIdentifier());
-        }
-
-        return serialized;
+        return patterns.stream().map(p -> p.getColor().toString() + ":" + p.getPattern().getIdentifier()).collect(Collectors.toList());
     }
 
     private static List<Pattern> deserializePatterns(List<String> serialized) {
@@ -1153,6 +1296,24 @@ public class CustomItem implements Cloneable {
                 PatternType type = PatternType.getByIdentifier(split[1]);
 
                 patterns.add(new Pattern(color, type));
+            }
+        }
+
+        return patterns;
+    }
+
+    public static List<String> serializedItemFlags(List<ItemFlag> itemFlags) {
+        return itemFlags.stream().map(Enum::name).collect(Collectors.toList());
+    }
+
+    public static List<ItemFlag> deserializeItemFlags(List<String> serialized) {
+        List<ItemFlag> patterns = new ArrayList<>();
+
+        for (String string : serialized) {
+            try {
+                patterns.add(ItemFlag.valueOf(string));
+            } catch (IllegalArgumentException ignored) {
+
             }
         }
 

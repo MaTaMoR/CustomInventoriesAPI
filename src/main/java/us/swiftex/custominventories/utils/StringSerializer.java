@@ -2,6 +2,7 @@ package us.swiftex.custominventories.utils;
 
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import us.swiftex.custominventories.utils.CastUtils.FormatException;
@@ -21,6 +22,7 @@ public class StringSerializer {
     private static final Pattern LORE_PATTER = Pattern.compile("lore:\"([^\"]*)");
     private static final Pattern ENCHANTMENTS_PATTERN = Pattern.compile("enchant:([^:\\s]*):([^:\\s]*)");
     private static final Pattern EFFECTS_PATTERN = Pattern.compile("effect:([^:\\s]*):([^:\\s]*):([^:\\s]*)");
+    private static final Pattern ITEM_FLAGS_PATTERN = Pattern.compile("flags:([^\"]*)");
 
     public static String getName(String text) {
         Matcher matcher = NAME_PATTERN.matcher(text);
@@ -31,7 +33,7 @@ public class StringSerializer {
         return null;
     }
 
-    public static List<String> getLore(String text) throws SerializerException {
+    public static List<String> getLore(String text) throws StringSerializerException {
         List<String> lore = new ArrayList<>();
 
         Matcher matcher = LORE_PATTER.matcher(text);
@@ -42,7 +44,7 @@ public class StringSerializer {
         return lore;
     }
 
-    public static MaterialEntry getMaterial(String text) throws SerializerException {
+    public static MaterialEntry getMaterial(String text) throws StringSerializerException {
         Matcher matcher = MATERIAL_PATTERN.matcher(text);
         if(matcher.find()) {
             Material material;
@@ -53,14 +55,14 @@ public class StringSerializer {
                 material = Material.matchMaterial(matcher.group(1));
             }
 
-            if(material == null) throw new SerializerException("The material is not found : " + matcher.group(1));
+            if(material == null) throw new StringSerializerException("The material is not found : " + matcher.group(1));
 
             Amount amount = new SimpleAmount(1);
             if(matcher.group(2) != null) {
                 try {
                     amount = AmountUtil.deserialize(matcher.group(2));
                 } catch (FormatException e) {
-                    throw new SerializerException("Invalid amount : " + matcher.group(2));
+                    throw new StringSerializerException("Invalid amount : " + matcher.group(2));
                 }
             }
 
@@ -70,23 +72,23 @@ public class StringSerializer {
                 try {
                     dataValue = (short) CastUtils.asInt(matcher.group(3));
                 } catch (FormatException e) {
-                    throw new SerializerException("Invalid data value : " + matcher.group(2));
+                    throw new StringSerializerException("Invalid data value : " + matcher.group(2));
                 }
             }
 
             return new MaterialEntry(material, amount, dataValue);
         }
 
-        throw new SerializerException("Invalid format Material");
+        throw new StringSerializerException("Invalid format Material");
     }
 
-    public static Map<Enchantment, Integer> getEnchantments(String text) throws SerializerException {
+    public static Map<Enchantment, Integer> getEnchantments(String text) throws StringSerializerException {
         Map<Enchantment, Integer> enchantments = new HashMap<>();
 
         Matcher matcher = ENCHANTMENTS_PATTERN.matcher(text);
         while (matcher.find()) {
             Enchantment enchantment = MinecraftEnchantments.getEnchantment(matcher.group(1));
-            if(enchantment == null) throw new SerializerException("The enchantment " + matcher.group(1) + " was not found");
+            if(enchantment == null) throw new StringSerializerException("The enchantment " + matcher.group(1) + " was not found");
 
             int level = CastUtils.asInt(matcher.group(2));
 
@@ -96,13 +98,13 @@ public class StringSerializer {
         return enchantments;
     }
 
-    public static List<PotionEffect> getEffects(String text) throws SerializerException {
+    public static List<PotionEffect> getEffects(String text) throws StringSerializerException {
         List<PotionEffect> effects = new ArrayList<>();
 
         Matcher matcher = EFFECTS_PATTERN.matcher(text);
         while (matcher.find()) {
             PotionEffectType type = PotionEffectType.getByName(matcher.group(1));
-            if(type == null) throw new SerializerException("The potion effect " + matcher.group(1) + " was not found");
+            if (type == null) throw new StringSerializerException("The potion effect " + matcher.group(1) + " was not found");
 
             int amplifier = CastUtils.asInt(matcher.group(2));
             int duration = CastUtils.asInt(matcher.group(3));
@@ -113,7 +115,26 @@ public class StringSerializer {
         return effects;
     }
 
-    public static CustomItem getItem(String text) throws SerializerException {
+    public static List<ItemFlag> getFlags(String text) throws StringSerializerException {
+        List<ItemFlag> itemFlags = new ArrayList<>();
+
+        Matcher matcher = ITEM_FLAGS_PATTERN.matcher(text);
+        while (matcher.find()) {
+            String[] args = matcher.group(1).split(",");
+
+            for (String arg : args) {
+                try {
+                    itemFlags.add(ItemFlag.valueOf(arg));
+                } catch (IllegalArgumentException e) {
+                    throw new StringSerializerException("The ItemFlag " + arg + " was not found");
+                }
+            }
+        }
+
+        return itemFlags;
+    }
+
+    public static CustomItem getItem(String text) throws StringSerializerException {
         MaterialEntry material = getMaterial(text);
         if(material == null) return null;
 
@@ -121,20 +142,21 @@ public class StringSerializer {
         List<String> lore = getLore(text);
         Map<Enchantment, Integer> enchantments = getEnchantments(text);
         List<PotionEffect> effects = getEffects(text);
+        List<ItemFlag> itemFlags = getFlags(text);
 
         return CustomItem.builder(material.getMaterial(), material.getAmount(), material.getDataValue()).setName(name).setLore(lore)
-             .setEnchantments(enchantments).setPotionEffects(effects).build();
+             .setEnchantments(enchantments).setPotionEffects(effects).setItemFlags(itemFlags).build();
     }
 
     public static String toString(CustomItem customItem) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("material:").append(customItem.getMaterial().name()).append(":").append(AmountUtil.serialize(customItem.getActualAmount())).append(":").append(customItem.getDataValue());
 
-        if(customItem.getName() != null) {
+        if (customItem.getName() != null) {
             stringBuilder.append(" ").append("name:").append('"').append(customItem.getName()).append('"');
         }
 
-        if(customItem.getLore().size() > 0) {
+        if (customItem.getLore().size() > 0) {
             StringBuilder loreBuilder = new StringBuilder();
             loreBuilder.append("lore:").append('"');
 
@@ -142,7 +164,7 @@ public class StringSerializer {
             while (lore.hasNext()) {
                 loreBuilder.append(lore.next());
 
-                if(lore.hasNext()) {
+                if (lore.hasNext()) {
                     loreBuilder.append('|');
                 } else {
                     loreBuilder.append('"');
@@ -152,7 +174,7 @@ public class StringSerializer {
             stringBuilder.append(" ").append(loreBuilder.toString());
         }
 
-        if(customItem.getEnchantments().size() > 0) {
+        if (customItem.getEnchantments().size() > 0) {
             StringBuilder enchantmentsBuilder = new StringBuilder();
 
             Iterator<Entry<Enchantment, Integer>> iterator = customItem.getEnchantments().entrySet().iterator();
@@ -161,7 +183,7 @@ public class StringSerializer {
 
                 enchantmentsBuilder.append("enchant:").append(MinecraftEnchantments.getName(entry.getKey())).append(":").append(entry.getValue());
 
-                if(iterator.hasNext()) {
+                if (iterator.hasNext()) {
                     stringBuilder.append(" ");
                 }
             }
@@ -169,7 +191,7 @@ public class StringSerializer {
             stringBuilder.append(" ").append(enchantmentsBuilder.toString());
         }
 
-        if(customItem.getPotionEffects().size() > 0) {
+        if (customItem.getPotionEffects().size() > 0) {
             StringBuilder effectsBuilder = new StringBuilder();
 
             Iterator<PotionEffect> iterator = customItem.getPotionEffects().iterator();
@@ -178,7 +200,7 @@ public class StringSerializer {
 
                 effectsBuilder.append("effect:").append(entry.getType().getName()).append(":").append(entry.getAmplifier()).append(":").append(entry.getDuration());
 
-                if(iterator.hasNext()) {
+                if (iterator.hasNext()) {
                     stringBuilder.append(" ");
                 }
             }
@@ -186,12 +208,31 @@ public class StringSerializer {
             stringBuilder.append(" ").append(effectsBuilder.toString());
         }
 
+        if (customItem.hasItemFlags()) {
+            StringBuilder flagsBuilder = new StringBuilder();
+
+            flagsBuilder.append("flags:");
+
+            Iterator<ItemFlag> iterator = customItem.getItemFlags().iterator();
+            while (iterator.hasNext()) {
+                ItemFlag entry = iterator.next();
+
+                flagsBuilder.append(entry.name());
+
+                if (iterator.hasNext()) {
+                    flagsBuilder.append(",");
+                }
+            }
+
+            stringBuilder.append(" ").append(flagsBuilder.toString());
+        }
+
         return stringBuilder.toString();
     }
 
-    public static class SerializerException extends RuntimeException {
+    public static class StringSerializerException extends RuntimeException {
 
-        public SerializerException(String message) {
+        public StringSerializerException(String message) {
             super(message);
         }
 

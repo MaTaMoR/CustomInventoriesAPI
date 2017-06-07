@@ -108,7 +108,7 @@ public abstract class NBTType<V, T extends NBTTag<V>> {
 
     public static final NBTType<List<NBTTag>, NBTTagList> LIST = new NBTType<List<NBTTag>, NBTTagList>(null, null, "NBTTagList", Reflections.getConstructor("{nms}.NBTTagList")) {
 
-        private final MethodInvoker ADD = Reflections.getMethod(minecraftClass, "add", Reflections.getClass("{nms}.NBTBase"));
+        private final MethodInvoker ADD = Reflections.getMethod(Reflections.getClass("{nms}.NBTTagList"), "add", Reflections.getClass("{nms}.NBTBase"));
 
         @Override
         public NBTTagList newInstance(List<NBTTag> value) {
