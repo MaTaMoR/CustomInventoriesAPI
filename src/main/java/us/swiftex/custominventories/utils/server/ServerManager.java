@@ -33,29 +33,27 @@ public class ServerManager {
                         iterator.remove();
                         plugin.getLogger().log(Level.SEVERE, "Removed server " + info.getName() + " from tracking due to inactivity ");
                     } else if (info.should()) {
-                        boolean displayOffline = false;
+                        boolean displayOffline = true;
 
                         info.setLastUpdate(now);
 
                         try {
-                            PingResponse data = ServerPinger.fetchData(info.getAddress(), 1000);
+                            PingResponse data = ServerPinger.fetchData(info.getServerAddress(), 1000);
 
                             if (data.isOnline()) {
+                                displayOffline = false;
+
                                 info.setOnline(true);
                                 info.setOnlinePlayers(data.getOnlinePlayers());
                                 info.setMaxPlayers(data.getMaxPlayers());
                                 info.setMotd(data.getMotd());
-                            } else {
-                                displayOffline = true;
                             }
                         } catch (UnknownHostException | ConnectException | SocketTimeoutException e) {
-                            displayOffline = true;
-                            if(Settings.LOG_ON_SERVER_DOWN.get()) {
-                                plugin.getLogger().log(Level.SEVERE, "Couldn't fetch data from " + info.getName() + "(" + info.getAddress() + ") connection exception");
+                            if (Settings.LOG_ON_SERVER_DOWN.get()) {
+                                plugin.getLogger().log(Level.SEVERE, "Couldn't fetch data from " + info.getName() + "(" + info.getServerAddress() + ") connection exception");
                             }
                         } catch (Exception e) {
-                            displayOffline = true;
-                            plugin.getLogger().log(Level.SEVERE, "Couldn't fetch data from " + info.getName() + "(" + info.getAddress() + "), unhandled exception: ", e);
+                            plugin.getLogger().log(Level.SEVERE, "Couldn't fetch data from " + info.getName() + "(" + info.getServerAddress() + "), unhandled exception: ", e);
                         }
 
                         if (displayOffline) {
@@ -71,9 +69,11 @@ public class ServerManager {
     }
 
     public synchronized void register(ServerInfo info) {
-        if(servers.containsKey(info.getName())) throw new RuntimeException("The server " + info.getName() + " is already registered");
+        if (this.servers.containsKey(info.getName())) {
+            throw new RuntimeException("The server " + info.getName() + " is already registered");
+        }
 
-        servers.put(info.getName(), info);
+        this.servers.put(info.getName(), info);
     }
 
     public synchronized void unregister(String name) {
@@ -97,7 +97,7 @@ public class ServerManager {
     }
 
     public synchronized void stop() {
-        if(isActive()) {
+        if (isActive()) {
             task.cancel();
             task = null;
         }

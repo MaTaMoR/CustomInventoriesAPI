@@ -22,11 +22,11 @@ public class StringSerializer {
     private static final Pattern LORE_PATTER = Pattern.compile("lore:\"([^\"]*)");
     private static final Pattern ENCHANTMENTS_PATTERN = Pattern.compile("enchant:([^:\\s]*):([^:\\s]*)");
     private static final Pattern EFFECTS_PATTERN = Pattern.compile("effect:([^:\\s]*):([^:\\s]*):([^:\\s]*)");
-    private static final Pattern ITEM_FLAGS_PATTERN = Pattern.compile("flags:([^\"]*)");
+    private static final Pattern ITEM_FLAGS_PATTERN = Pattern.compile("flags:([^:\\s]*)");
 
     public static String getName(String text) {
         Matcher matcher = NAME_PATTERN.matcher(text);
-        if(matcher.find()) {
+        if (matcher.find()) {
             return matcher.group(1);
         }
 
@@ -37,7 +37,7 @@ public class StringSerializer {
         List<String> lore = new ArrayList<>();
 
         Matcher matcher = LORE_PATTER.matcher(text);
-        if(matcher.find()) {
+        if (matcher.find()) {
             lore.addAll(Arrays.asList(matcher.group(1).split("\\|")));
         }
 
@@ -46,7 +46,7 @@ public class StringSerializer {
 
     public static MaterialEntry getMaterial(String text) throws StringSerializerException {
         Matcher matcher = MATERIAL_PATTERN.matcher(text);
-        if(matcher.find()) {
+        if (matcher.find()) {
             Material material;
 
             try {
@@ -55,10 +55,10 @@ public class StringSerializer {
                 material = Material.matchMaterial(matcher.group(1));
             }
 
-            if(material == null) throw new StringSerializerException("The material is not found : " + matcher.group(1));
+            if (material == null) throw new StringSerializerException("The material is not found : " + matcher.group(1));
 
             Amount amount = new SimpleAmount(1);
-            if(matcher.group(2) != null) {
+            if (matcher.group(2) != null) {
                 try {
                     amount = AmountUtil.deserialize(matcher.group(2));
                 } catch (FormatException e) {
@@ -68,7 +68,7 @@ public class StringSerializer {
 
             short dataValue = 0;
 
-            if(matcher.group(3) != null) {
+            if (matcher.group(3) != null) {
                 try {
                     dataValue = (short) CastUtils.asInt(matcher.group(3));
                 } catch (FormatException e) {
@@ -88,7 +88,7 @@ public class StringSerializer {
         Matcher matcher = ENCHANTMENTS_PATTERN.matcher(text);
         while (matcher.find()) {
             Enchantment enchantment = MinecraftEnchantments.getEnchantment(matcher.group(1));
-            if(enchantment == null) throw new StringSerializerException("The enchantment " + matcher.group(1) + " was not found");
+            if (enchantment == null) throw new StringSerializerException("The enchantment " + matcher.group(1) + " was not found");
 
             int level = CastUtils.asInt(matcher.group(2));
 

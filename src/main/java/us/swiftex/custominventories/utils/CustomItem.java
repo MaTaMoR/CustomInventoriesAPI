@@ -540,13 +540,9 @@ public class CustomItem implements Cloneable {
             if (itemMeta instanceof EnchantmentStorageMeta) {
                 EnchantmentStorageMeta storageMeta = (EnchantmentStorageMeta) itemMeta;
 
-                for (Map.Entry<Enchantment, Integer> entry : this.enchantments.entrySet()) {
-                    storageMeta.addStoredEnchant(entry.getKey(), entry.getValue(), true);
-                }
+                this.enchantments.forEach((k, v) -> storageMeta.addStoredEnchant(k, v, true));
             } else {
-                for (Map.Entry<Enchantment, Integer> entry : this.enchantments.entrySet()) {
-                    itemMeta.addEnchant(entry.getKey(), entry.getValue(), true);
-                }
+                this.enchantments.forEach((k, v) -> itemMeta.addEnchant(k, v, true));
             }
         }
 

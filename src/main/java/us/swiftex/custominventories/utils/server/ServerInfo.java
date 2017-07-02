@@ -1,5 +1,7 @@
 package us.swiftex.custominventories.utils.server;
 
+import lombok.Getter;
+import lombok.Setter;
 import us.swiftex.custominventories.utils.Messages;
 
 import java.lang.String;
@@ -8,16 +10,31 @@ import java.net.InetSocketAddress;
 
 public class ServerInfo {
 
+    @Getter
     private final ServerAddress serverAddress;
+
+    @Getter
     private final String name;
+
+    @Getter
     private final int interval;
+
+    @Getter
     private final long millisInterval;
 
+    @Getter @Setter
     private long lastUpdate;
 
+    @Getter @Setter
     private boolean online;
+
+    @Getter @Setter
     private String motd;
+
+    @Getter @Setter
     private int onlinePlayers;
+
+    @Getter @Setter
     private int maxPlayers;
 
     public ServerInfo(InetSocketAddress serverAddress, String name, int interval) {
@@ -36,63 +53,7 @@ public class ServerInfo {
         this.maxPlayers = 0;
     }
 
-    public synchronized ServerAddress getAddress() {
-        return this.serverAddress;
-    }
-
-    public synchronized String getName() {
-        return name;
-    }
-
-    public synchronized int getInterval() {
-        return interval;
-    }
-
-    public synchronized long getMillisInterval() {
-        return millisInterval;
-    }
-
-    public synchronized boolean should() {
+    public boolean should() {
         return System.currentTimeMillis() >= (millisInterval + lastUpdate);
-    }
-
-    public synchronized long getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public synchronized void setLastUpdate(long lastUpdate) {
-        this.lastUpdate = lastUpdate;
-    }
-
-    public synchronized void setOnline(boolean online) {
-        this.online = online;
-    }
-
-    public synchronized boolean isOnline() {
-        return online;
-    }
-
-    public synchronized void setMotd(String motd) {
-        this.motd = motd;
-    }
-
-    public synchronized String getMotd() {
-        return motd;
-    }
-
-    public synchronized int getOnlinePlayers() {
-        return onlinePlayers;
-    }
-
-    public synchronized void setOnlinePlayers(int onlinePlayers) {
-        this.onlinePlayers = onlinePlayers;
-    }
-
-    public synchronized int getMaxPlayers() {
-        return maxPlayers;
-    }
-
-    public synchronized void setMaxPlayers(int maxPlayers) {
-        this.maxPlayers = maxPlayers;
     }
 }
