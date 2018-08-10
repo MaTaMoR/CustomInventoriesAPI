@@ -1,4 +1,7 @@
 name: CustomInventoriesAPI
-main: us.swiftex.custominventories.CustomInventories
-version: 1.17
+main: me.matamor.custominventories.CustomInventories
+version: 1.18
 author: MaTaMoR_
+commands:
+  testcommand:
+    usage: /<command>
